@@ -1,3 +1,7 @@
+#project specific
+cards.txt
+markings.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

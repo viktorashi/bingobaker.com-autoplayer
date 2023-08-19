@@ -3,10 +3,10 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from typing import overload
 from time import sleep
+
 class BingoAutomator:
-    def __init__(self, driver :webdriver , url : str , cards_location = "cards.txt", input_phrases = "input.txt", output_path = "output.txt", timeout :int = 0.44) -> None:
+    def __init__(self, driver :webdriver , url : str = '' , cards_location = "cards.txt", input_phrases = "input.txt", output_path = "output.txt", timeout :int = 0.3) -> None:
         '''
         driver : selenium.webdriver
         url : string of the bingomaker.com generator url

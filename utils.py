@@ -240,4 +240,3 @@ class BingoAutomator:
          with open(self.output_path, 'a') as f:
               f.write(cardURL + '\n')
 
-#TODO  sa vezi sa fie bifat pe mijloc tot timpu ala, cand creezi cardu adica

@@ -4,9 +4,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from time import sleep
-
-class BingoAutomator:
-    def __init__(self, driver :webdriver , url : str = '' , cards_location = "cards.txt", input_phrases = "input.txt", output_path = "output.txt", timeout :int = 0.3) -> None:
+from typing import Dict
+class autobingo:
+    def __init__(self, driver :webdriver , url : str = '' , cards_path = "cards.txt", input_path= "input.txt", output_path = "output.txt", timeout :int = .6 ) -> None:
         '''
         driver : selenium.webdriver
         url : string of the bingomaker.com generator url
@@ -16,16 +16,23 @@ class BingoAutomator:
         '''
         #turn input phrases file path into list of strings
         
-        with open(input_phrases) as f:
-            input_phrases = f.read().splitlines()
-                
-        self.input_phrases : [str] = input_phrases
+        phrases : [str]
+        with open(input_path) as f:
+            phrases = f.read().splitlines()
 
-        self.driver = driver            
-        self.url = url
+        cards : [str]
+        with open(cards_path) as f:
+            cards = f.read().splitlines()
+
+        self.cards = cards
+        self.input_path : [str]= phrases
+        self.driver =  driver            
+        self.url =  url
         self.output_path = output_path
-        self.cards_location = cards_location
-        self.timeout = timeout
+        self.cards_path =  cards_path
+        self.timeout =  timeout
+
+        
 
     def waitElement(self,xpath : str) -> WebElement :
         return WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, xpath)))
@@ -34,7 +41,8 @@ class BingoAutomator:
         '''
         writes the link to the cards.txt file
         '''
-        with open(self.cards_location, "a") as f:
+        self.cards.append(link)
+        with open(self.cards_path, "a") as f:
             f.write(link + '\n')
 
     def createCards(self, num : int) -> None:
@@ -61,25 +69,21 @@ class BingoAutomator:
             except TimeoutError:
                 print(TimeoutError)
 
-    
     def mark_spots_list(self, input_phrases : list[str]) -> None:
         ''''
         input_phrases : list of strings that will be searched for in the bingo card
         '''
         try:
             #obtains the cards links
-            cards =[]
-            with open(self.cards_location) as f:
-                cards = f.read().splitlines()
+            
             #for each card, find word from marking and check if, and if found check to see if that card has  a bingo, if yes report it to the logs along wit that card's link and print, continue on with the next card and go on 
-            for cardURL in cards:
+            for cardURL in self.cards:
                 self.driver.get(cardURL)
                 found = self.find_words_click_and_return_num_of_found(input_phrases)
                 if (found and self.check_bingo_and_write_to_output()):
-                        print("CONGRATS YO YOU GOT A BINGOO!!!")
+                        print("CONGRATS YO YOU GOT A BINGOO!!!, check the output file for the link")
         except TimeoutError:
             print(TimeoutError)    
-    
     
     def mark_spots_str(self, input_phrases : str) -> None:
         ''''
@@ -87,9 +91,7 @@ class BingoAutomator:
         '''
         try:
             #obtains the cards links
-            cards =[]
-            with open(self.cards_location) as f:
-                cards = f.read().splitlines()
+            
             #for each card, find word from marking and check if, and if found check to see if that card has  a bingo, if yes report it to the logs along wit that card's link and print, continue on with the next card and go on 
             #get the input phrases as list from the file
 
@@ -98,11 +100,11 @@ class BingoAutomator:
 
             print(input_phrases)
 
-            for cardURL in cards:
+            for cardURL in self.cards:
                 self.driver.get(cardURL)
                 found = self.find_words_click_and_return_num_of_found(input_phrases)
                 if (found and self.check_bingo_and_write_to_output()):
-                        print("CONGRATS YO YOU GOT A BINGOO!!!")
+                        print("CONGRATS YO YOU GOT A BINGOO!!!, check the output file for the link")
         except TimeoutError:
             print(TimeoutError)
     
@@ -111,21 +113,17 @@ class BingoAutomator:
         default for no file or list of words, uses the default input.txt file specified in the constructor
         '''
         try:
-            #obtains the cards links
-            cards =[]
-            with open(self.cards_location) as f:
-                cards = f.read().splitlines()
+            
             #for each card, find word from marking and check if, and if found check to see if that card has  a bingo, if yes report it to the logs along wit that card's link and print, continue on with the next card and go on 
             #get the input phrases as list from the file
             
-            for cardURL in cards:
+            for cardURL in self.cards:
                 self.driver.get(cardURL)
                 found = self.find_words_click_and_return_num_of_found(self.input_phrases)
                 if (found and self.check_bingo_and_write_to_output()):
-                        print("CONGRATS YO YOU GOT A BINGOO!!!")
+                        print("CONGRATS YO YOU GOT A BINGOO!!!, check the output file for the link")
         except TimeoutError:
             print(TimeoutError)
-
 
     def clear_card(self) -> None:
         '''
@@ -149,11 +147,7 @@ class BingoAutomator:
         '''
         clears all the cards from the cards.txt file
         '''
-        cards =[]
-        with open(self.cards_location) as f:
-            cards = f.read().splitlines()
-
-        for cardURL in cards:
+        for cardURL in self.cards:
             self.driver.get(cardURL)
             self.clear_card()
         
@@ -220,11 +214,7 @@ class BingoAutomator:
         '''
         checks bingo for all cards in the cards.txt file
         '''
-        cards =[]
-        with open(self.cards_location) as f:
-            cards = f.read().splitlines()
-
-        for cardURL in cards:
+        for cardURL in self.cards:
             self.driver.get(cardURL)
             self.check_bingo_and_write_to_output()
              

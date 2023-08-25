@@ -148,7 +148,7 @@ def check_bingo_and_write_to_output(self) -> bool:
 
 
 def write_to_output(self, cardURL: str) -> None:
-    with open(self.output_path, "a") as f:
+    with open(self.output_path, "a+") as f:
         f.write(cardURL + "\n")
 
 

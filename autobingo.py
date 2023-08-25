@@ -14,7 +14,7 @@ e pe moduri:
     - clear
 """
 parser = argparse.ArgumentParser(
-    description="AutoBingo command line tool. Currently only being used for bingobaker.com",
+    description="Auto Bingo playing command line tool. Currently only being used for bingobaker.com",
     prog="autobingo",
     epilog="ion care how u use my code lol",
 )

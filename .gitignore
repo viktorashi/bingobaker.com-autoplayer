@@ -4,6 +4,10 @@ markings.txt
 input.txt
 output.txt
 test.py
+bruh.py
+bingoconfig.json
+pyvenv.cfg
+wait.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

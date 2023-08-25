@@ -2,7 +2,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from main import autobingo
+import json
 from typing import Callable
 from time import sleep
 
@@ -133,10 +133,12 @@ def check_full_bingo(self) -> bool:
 def check_bingo_and_write_to_output(self) -> bool:
     # this assumes the viewport is already on that specific card, so function must be used right after finding new word on current page
 
-    check_bigo: Callable[[autobingo], bool]
+    check_bigo: Callable[[any], bool]
     match self.type:
         case "normal":
             check_bingo = check_bingo_row_collumn_diagonal
+        case "full":
+            check_bingo = check_full_bingo
 
     if check_bingo(self):
         curr_url = str(self.driver.current_url)
@@ -150,5 +152,11 @@ def write_to_output(self, cardURL: str) -> None:
         f.write(cardURL + "\n")
 
 
-def update_config():
-    pass
+def update_config(options: dict):
+    with open("bingoconfig.json", "w+") as f:
+        f.write(json.dumps(options))
+
+
+def read_from_config() -> dict:
+    with open("bingoconfig.json", "r") as f:
+        return json.loads(f.read())

@@ -8,10 +8,7 @@ from utils import (
     writeTheCards,
     clear_card,
     find_words_click_and_return_num_of_found,
-    check_bingo,
     check_bingo_and_write_to_output,
-    write_to_output,
-    check_full_bingo,
 )
 
 # do enums
@@ -26,7 +23,7 @@ class autobingo:
         input_path="input.txt",
         output_path="output.txt",
         timeout: int = 0.6,
-        type: bool = False,
+        type: str = "normal",
     ) -> None:
         """
         driver : selenium.webdriver
@@ -49,7 +46,7 @@ class autobingo:
         with open(input_path) as f:
             input_phrases = f.read().splitlines()
 
-        self.full_bingo = full_bingo
+        self.type = type
         self.input_phrases = input_phrases
         self.cards = cards
         self.input_path: [str] = phrases

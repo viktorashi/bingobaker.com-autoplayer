@@ -5,7 +5,10 @@ bruh.py
 bingoconfig.json
 pyvenv.cfg
 wait.txt
-`
+input.txt
+output.txt
+cards.txt
+.DS_Store
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

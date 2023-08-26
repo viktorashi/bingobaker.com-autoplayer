@@ -78,7 +78,7 @@ class autobingo:
                 for elem in elems:
                     cnt += 1
                     if cnt == 13:
-                        sleep(self.timeout)
+                        # sleep(self.timeout)
                         elem.click()
                 writeTheCards(self, str(self.driver.current_url))
             except TimeoutError:

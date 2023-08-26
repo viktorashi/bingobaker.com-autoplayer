@@ -115,7 +115,7 @@ options:
 
 <h3><span style="color:#F47174"> 3. It will all be saved  </span></h3>
 
-### Every parameter you value you provide to the command will be saved in a file called ***bingoconfig.json*** right next to the program. <h3><span style="color:red"> DO NOT CHANGE THE CONFIG FILE DIRECTLY</span></h3>
+### Every parameter value you provide to the command will be saved in a file called ***bingoconfig.json*** right next to the program. <h3><span style="color:red"> DO NOT CHANGE THE CONFIG FILE DIRECTLY</span></h3>
 idk how well i've tested this but i believe it starts messing up if you do. But delete it all-togather if you have and it doesn't work anymore, it will just generate another one.
 
 

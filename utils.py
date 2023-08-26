@@ -13,6 +13,12 @@ def waitElement(self, xpath: str) -> WebElement:
     )
 
 
+def waitElementSelector(self, selector: str) -> WebElement:
+    return WebDriverWait(self.driver, 10).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+    )
+
+
 def writeTheCards(self, link: str) -> None:
     """
     writes the link to the cards.txt file
@@ -29,7 +35,22 @@ def clear_card(self) -> None:
     """
     # this checks for free space
     cnt = 0
-    waitElement(self, "/html/body/div[3]/a")
+    waitElement(self, "/html/body/div[3]/a").click()
+
+    waitElement(self, "/html/body/div[3]/div/div[6]/a").click()
+
+    # switch to alert and accept
+    self.driver.switch_to.alert.accept()
+    # switch back to default content
+
+    self.driver.switch_to.default_content()
+
+    # wait for the page to load
+    # click on the free space
+    waitElementSelector(
+        self, "#svg > svg > g:nth-child(20) > g > text > tspan:nth-child(1)"
+    ).click()
+
     """
     mai sunt cateva clickuri
     """

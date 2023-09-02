@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "mode",
     help="The mode to run the program in. [default: editconfig]",
-    choices=["editconfig", "generate", "checkbingos", "mark", "clear"],
+    choices=["editconfig", "generate", "checkbingos", "mark", "clear", "markmid"],
     nargs="?",
 )
 
@@ -75,7 +75,28 @@ parser.add_argument(
     help="Timeout in seconds for the webdriver to wait before clicking on each element to prevent malfunction [default : 0.6 ]",
     type=float,
 )
-
+parser.add_argument(
+    "-gm",
+    "--gamemode",
+    help="The gamemode to play in. [default: normal] ",
+    type=str,
+    choices=["normal", "blackout", "peen"],
+    dest="type",
+)
+parser.add_argument(
+    "-s",
+    "--size",
+    help="The size of the bingo card [default: 5 (must be odd, otherwise don't really make sense) ] ",
+    type=int,
+    dest="size",
+)
+parser.add_argument(
+    "-r",
+    "--reverse",
+    help="Reverse the bingo card order when reading from [cards.txt] [default False]",
+    action="store_true",
+    dest="reverse",
+)
 # the rest of the defaults are in the autobingo class definition
 parser.set_defaults(count=-1, mode="editconfig", driver="default")
 
@@ -169,3 +190,5 @@ match args["mode"]:
         bingo.mark_spots()
     case "clear":
         bingo.clear_all_cards()
+    case "markmid":
+        bingo.mark_all_middle_spots()

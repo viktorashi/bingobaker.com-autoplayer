@@ -82,7 +82,7 @@ def find_words_click_and_return_num_of_found(self, input_phrases: list[str]) -> 
     return cnt
 
 
-def check_bingo_row_collumn_diagonal(self) -> bool:
+def get_squares(self) -> [[bool]]:
     # must be used at the viewport already on that specific card, so function must be used right after finding new word on current page
     squares: [[bool]] = []
     elems = WebDriverWait(self.driver, 10).until(
@@ -102,68 +102,66 @@ def check_bingo_row_collumn_diagonal(self) -> bool:
             row.append(1)
         else:
             row.append(0)
-        if cnt == 5:
+        if cnt == self.size:
             squares.append(row)
             cnt = 0
             row = []
+    return squares
 
+
+def check_bingo_row_collumn_diagonal(size, squares) -> bool:
     # check bingo for elements in row, collumn or diagonal
-    for i in range(5):
-        if sum(squares[i]) == 5:
+    for i in range(size):
+        if sum(squares[i]) == size:
             return True
-        if sum([row[i] for row in squares]) == 5:
+        if sum([row[i] for row in squares]) == size:
             return True
-        if sum([squares[i][i] for i in range(5)]) == 5:
+        if sum([squares[i][i] for i in range(size)]) == size:
             return True
-        if sum([squares[i][4 - i] for i in range(5)]) == 5:
+        if sum([squares[i][size - 1 - i] for i in range(size)]) == size:
             return True
     return False
 
 
-def check_full_bingo(self) -> bool:
-    squares: [[bool]] = []
-    elems = WebDriverWait(self.driver, 10).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "image"))
-    )
-    cnt = 0
-    row: [bool] = []
-    for elem in elems:
-        cnt += 1
-        # XAPTHU SFANTTT
-        # xpath = f"/html/body/div[2]/*[local-name() = 'svg']/*[local-name()='g'][{i*5 + j + 1}]/*[local-name()='g']/*[local-name()='image']"
-        visibilty = elem.get_dom_attribute("visibility")
-
-        # daca e gol gen '' sau daca apare visibilty visib;e atunci e shown si doar daca apare hidden e hidden bruh
-
-        if visibilty == "visible" or visibilty == "":
-            row.append(1)
-        else:
-            row.append(0)
-        if cnt == 5:
-            squares.append(row)
-            cnt = 0
-            row = []
-
+def check_blackout(size, squares) -> bool:
     # check if all squares are filled
-    for i in range(5):
-        if sum(squares[i]) != 5:
+    for i in range(size):
+        if sum(squares[i]) != size:
             return False
     return True
+
+
+def peen(size, squares) -> bool:
+    # check middle collumn and bottom row
+    for i in range(size):
+        sum = 0
+        if squares[i][size // 2] == 1:
+            sum += 1
+        if squares[size - 1][i] == 1:
+            sum += 1
+    if sum == 2 * size - 2:
+        return True
 
 
 def check_bingo_and_write_to_output(self) -> bool:
     # this assumes the viewport is already on that specific card, so function must be used right after finding new word on current page
 
     check_bigo: Callable[[any], bool]
+
     match self.type:
         case "normal":
             check_bingo = check_bingo_row_collumn_diagonal
-        case "full":
-            check_bingo = check_full_bingo
+        case "blackout":
+            check_bingo = check_blackout
+        case "peen":
+            check_bingo = peen
 
-    if check_bingo(self):
+    if check_bingo(self.size, get_squares(self)):
         curr_url = str(self.driver.current_url)
         write_to_output(self, curr_url)
+        from playsound import playsound
+
+        playsound("bruh.mp3")
         return True
     return False
 
@@ -181,3 +179,17 @@ def update_config(options: dict):
 def read_from_config() -> dict:
     with open("bingoconfig.json", "r") as f:
         return json.loads(f.read())
+
+
+def click_middle(elems, size, self) -> None:
+    # size must be odd
+    from math import floor, ceil
+
+    # check if elem already clicked
+    mid = (floor(size / 2) * size) + ceil(size / 2)
+    # i forgot its indexed from 0 💀
+    elem = elems[mid - 1]
+    img = elem.find_element(By.TAG_NAME, "image")
+    if img.get_dom_attribute("visibility") == "hidden":
+        elem.click()
+        check_bingo_and_write_to_output(self)

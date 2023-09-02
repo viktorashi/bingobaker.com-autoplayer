@@ -9,6 +9,7 @@ from utils import (
     clear_card,
     find_words_click_and_return_num_of_found,
     check_bingo_and_write_to_output,
+    click_middle,
 )
 
 # do enums
@@ -24,13 +25,18 @@ class autobingo:
         output_path="output.txt",
         timeout: int = 0.6,
         type: str = "normal",
+        size: int = 5,
+        reverse: bool = False,
     ) -> None:
+        if size % 2 == 0:
+            raise Exception("size must be odd")
         """
         driver : selenium.webdriver
         url : string of the bingomaker.com generator url
         cards_location : where the cards links will be stored
         input_phrases : where the input phrases to search for will be stored
         output_path : where the bingo'ed cards' links will be stores [will be automatically created if not provided]
+        size must be odd
         """
         # turn input phrases file path into list of strings
 
@@ -39,22 +45,26 @@ class autobingo:
             phrases = f.read().splitlines()
 
         cards: [str]
-        with open(cards_path) as f:
+        with open(cards_path, "r+") as f:
             cards = f.read().splitlines()
 
         input_phrases: list[str]
         with open(input_path) as f:
             input_phrases = f.read().splitlines()
 
+        self.reverse = reverse
         self.type = type
         self.input_phrases = input_phrases
-        self.cards = cards
+        if self.reverse:
+            cards.reverse()
+        self.cards: [str] = cards
         self.input_path: [str] = phrases
         self.driver = driver
         self.url = url
         self.output_path = output_path
         self.cards_path = cards_path
         self.timeout = timeout
+        self.size = size
 
     def createCards(self, num: int) -> None:
         """
@@ -75,11 +85,7 @@ class autobingo:
                     )
                 )
                 cnt = 0
-                for elem in elems:
-                    cnt += 1
-                    if cnt == 13:
-                        # sleep(self.timeout)
-                        elem.click()
+                click_middle(elems, self.size, self)
                 writeTheCards(self, str(self.driver.current_url))
             except TimeoutError:
                 print(TimeoutError)
@@ -134,7 +140,6 @@ class autobingo:
         try:
             # for each card, find word from marking and check if, and if found check to see if that card has  a bingo, if yes report it to the logs along wit that card's link and print, continue on with the next card and go on
             # get the input phrases as list from the file
-
             for cardURL in self.cards:
                 self.driver.get(cardURL)
                 found = find_words_click_and_return_num_of_found(
@@ -162,3 +167,19 @@ class autobingo:
         for cardURL in self.cards:
             self.driver.get(cardURL)
             check_bingo_and_write_to_output(self)
+
+    def mark_all_middle_spots(self) -> None:
+        for cardURL in self.cards:
+            try:
+                # go to the website
+                self.driver.get(cardURL)
+                # check the free space in the middle (13th element)
+                elems = WebDriverWait(self.driver, 50).until(
+                    EC.visibility_of_all_elements_located(
+                        (By.CLASS_NAME, "bingo-card-svg g g")
+                    )
+                )
+                click_middle(elems, self.size, self)
+                writeTheCards(self, str(self.driver.current_url))
+            except TimeoutError:
+                print(TimeoutError)

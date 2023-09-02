@@ -66,6 +66,7 @@ for the operation and options
 - mark : starts checking each card from {--cards} to see if they contain any keywords from {--input}, if they do, they check for a bingo, which, if found will output the link of those cards tp {--output}
 - clear : clears the cards in {--cards} 
 - checkbingos :checks bingos for each card, will be less used since it automatically checks the bingo eitherway for each card as it searches
+- markmid : mark  all the middle free space spots for some reason i barely remember why i made this
 - editconfig : is the default behaviour if nothing specified, it does nothing but update the ***bingoconfig.json***
 
 ### <font size=5> --input <sub> [default: input.txt , shorthand -i]</sub> </font>  is the file in which you have the keywords you want to search for on the bingo cards, each keyword on a new line. They DON'T have to be specified exactly as in the cards, lowercase values will be compared and they can just contain  those strings 
@@ -112,6 +113,23 @@ options:
  - ie ("internet explorer" lol whytf idk can u even install it anymore? damn that nostalgia)
 
 ### <font size=5> --timeout <sub>[default : 0.6 , shorthand -t] </sub> </font>: the time the program waits before clicking an element if it has to, due to the webdriver messin up if it moves to fast sometimes, consider chaging it at will 
+
+### <font size=5> --gamemode <sub>[default : normal , shorthand -gm] </sub> </font>: The bingo shape for the code to check
+options:
+ - norrmal : full row, collumn or diagonal
+ - blackout : all spots
+ - peen : form of a peepee ╭ᑎ╮ middle collumn bottom row
+
+### <font size=5> --size <sub>[default : 5, shorthand -s] </sub> </font>: Size of the board, must be odd cuz don't make sense otherwise, there would be no middle
+
+### <font size=5> --reverse <sub>[Bool, default: False, shorthand -r] </sub> </font>: Wether  to do all operations on cards in reverse or normal order, usage: 
+```bash
+python autobingo.py mark -r
+```
+or 
+```bash
+python autobingo.py mark --reverse
+```
 
 <h3><span style="color:#F47174"> 3. It will all be saved  </span></h3>
 

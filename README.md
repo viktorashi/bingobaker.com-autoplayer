@@ -29,12 +29,12 @@ python  autobingo.py -h
 usage: autobingo [-h] [-d {chrome,edge,firefox,safari,ie,default}] [-u URL] [-cnt COUNT]
                  [-i INPUT_PATH] [-o OUTPUT_PATH] [-c CARDS_PATH] [-t TIMEOUT]
                  [-gm {normal,blackout,peen}] [-s SIZE] [-r]
-                 [{editconfig,generate,checkbingos,mark,clear,markmiddle}]
+                 [{editconfig,generate,checkbingos,mark,clear,markmid}]
 
 Auto Bingo playing command line tool. Currently only being used for bingobaker.com
 
 positional arguments:
-  {editconfig,generate,checkbingos,mark,clear,markmiddle}
+  {editconfig,generate,checkbingos,mark,clear,markmid}
                         The mode to run the program in. [default: editconfig]
 
 options:
@@ -52,12 +52,12 @@ options:
   -c CARDS_PATH, --cards CARDS_PATH
                         The path you want the cards to be saved in
   -t TIMEOUT, --timeout TIMEOUT
-                        Timeout in seconds for the webdriver to wait before clicking on each
-                        element to prevent malfunction [default : 0.6 ]
+                        Timeout in seconds for the webdriver to wait before clicking on
+                        each element to prevent malfunction [default : 0.6 ]
   -gm {normal,blackout,peen}, --gamemode {normal,blackout,peen}
                         The gamemode to play in. [default: normal]
-  -s SIZE, --size SIZE  The size of the bingo card [default: 5 (must be odd, otherwise don't
-                        really make sense) ]
+  -s SIZE, --size SIZE  The size of the bingo card [default: 5 (must be odd, otherwise
+                        don't really make sense) ]
   -r, --reverse         Reverse the bingo card order when reading from [cards.txt] [default
                         False]
 

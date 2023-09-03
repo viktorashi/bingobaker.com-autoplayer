@@ -26,9 +26,9 @@ git clone https://github.com/viktorashi/bingobaker.com-autoplayer && cd bingobak
 python  autobingo.py -h
 ```
 ```string
-usage: autobingo [-h] [-d {chrome,edge,firefox,safari,ie,default}] [-u URL] [-cnt COUNT]
-                 [-i INPUT_PATH] [-o OUTPUT_PATH] [-c CARDS_PATH] [-t TIMEOUT]
-                 [-gm {normal,blackout,peen}] [-s SIZE] [-r]
+usage: autobingo [-h] [-d {chrome,edge,firefox,safari,ie,default}] [-u URL] [-cnt COUNT] [-i INPUT_PATH]
+                 [-o OUTPUT_PATH] [-c CARDS_PATH] [-t TIMEOUT] [-gm {normal,blackout,peen}] [-s SIZE] [-r]
+                 [-hdls]
                  [{editconfig,generate,checkbingos,mark,clear,markmid}]
 
 Auto Bingo playing command line tool. Currently only being used for bingobaker.com
@@ -45,21 +45,21 @@ options:
   -cnt COUNT, --count COUNT
                         Number of bingo cards to generate from the generator link
   -i INPUT_PATH, --input INPUT_PATH
-                        The file containing the keywords to search for on the bingo cards
-                        [default: input.txt]
+                        The file containing the keywords to search for on the bingo cards [default: input.txt]
   -o OUTPUT_PATH, --output OUTPUT_PATH
                         File to write the bingo'ed cards to [default: output.txt]
   -c CARDS_PATH, --cards CARDS_PATH
                         The path you want the cards to be saved in
   -t TIMEOUT, --timeout TIMEOUT
-                        Timeout in seconds for the webdriver to wait before clicking on
-                        each element to prevent malfunction [default : 0.6 ]
+                        Timeout in seconds for the webdriver to wait before clicking on each element to prevent
+                        malfunction [default : 0.2 ]
   -gm {normal,blackout,peen}, --gamemode {normal,blackout,peen}
                         The gamemode to play in. [default: normal]
-  -s SIZE, --size SIZE  The size of the bingo card [default: 5 (must be odd, otherwise
-                        don't really make sense) ]
-  -r, --reverse         Reverse the bingo card order when reading from [cards.txt] [default
-                        False]
+  -s SIZE, --size SIZE  The size of the bingo card [default: 5 (must be odd, otherwise don't really make sense)
+                        ]
+  -r, --reverse         Reverse the bingo card order when reading from [cards.txt] [default False]
+  -hdls, --headless     Run the webdriver in headless mode (no interface for less VRAM consumption i think idk
+                        lol) [only possible for chrome, edge, firefox] [default False]
 
 ion care how u use my code lol
 ```
@@ -137,6 +137,8 @@ or
 ```bash
 python autobingo.py mark --reverse
 ```
+
+### <font size=5> --headless <sub>[Bool, default: False, shorthand -hdls] </sub> </font>: Wether to run it in headless mode for less VRAM usage (only for edge, chrome and firefox)
 
 <h3><span style="color:#F47174"> 3. It will all be saved  </span></h3>
 

@@ -72,7 +72,7 @@ parser.add_argument(
 parser.add_argument(
     "-t",
     "--timeout",
-    help="Timeout in seconds for the webdriver to wait before clicking on each element to prevent malfunction [default : 0.6 ]",
+    help="Timeout in seconds for the webdriver to wait before clicking on each element to prevent malfunction [default : 0.2 ]",
     type=float,
 )
 parser.add_argument(
@@ -96,6 +96,13 @@ parser.add_argument(
     help="Reverse the bingo card order when reading from [cards.txt] [default False]",
     action="store_true",
     dest="reverse",
+)
+parser.add_argument(
+    "-hdls",
+    "--headless",
+    help="Run the webdriver in headless mode (no interface for less VRAM consumption i think idk lol) [only possible for chrome, edge, firefox] [default False]",
+    action="store_true",
+    dest="headless",
 )
 # the rest of the defaults are in the autobingo class definition
 parser.set_defaults(count=-1, mode="editconfig", driver="default")
@@ -155,28 +162,43 @@ print("Options:")
 for option in options:
     print(f"{option} : {options[option]}")
 
+
 match options["driver"]:
     case "chrome":
-        options["driver"] = webdriver.Chrome()
+        if options["headless"]:
+            opts = webdriver.ChromeOptions()
+            opts.add_argument("--headless=new")
+            options["driver"] = webdriver.Chrome(options=opts)
+        else:
+            options["driver"] = webdriver.Chrome()
     case "edge":
-        options["driver"] = webdriver.Edge()
+        if options["headless"]:
+            opts = webdriver.EdgeOptions()
+            opts.add_argument("--headless=new")
+            options["driver"] = webdriver.Edge(options=opts)
+        else:
+            options["driver"] = webdriver.Edge()
     case "firefox":
-        options["driver"] = webdriver.Firefox()
+        if options["headless"]:
+            opts = webdriver.FirefoxOptions()
+            opts.add_argument("--headless=new")
+            options["driver"] = webdriver.Firefox(options=opts)
+        else:
+            options["driver"] = webdriver.Firefox()
     case "safari":
         options["driver"] = webdriver.Safari()
     case "ie":
         options["driver"] = webdriver.Ie()
     case _:
         options["driver"] = webdriver.Chrome()
-
 from main import autobingo
 
+not_for_class = ["count", "headless"]
 # preparing it for the autobingo class
 input_options = {}
 for option in options:
-    if not option == "count":
+    if not (option in not_for_class):
         input_options[option] = options[option]
-
 
 bingo = autobingo(**input_options)
 

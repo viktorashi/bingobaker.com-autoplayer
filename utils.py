@@ -187,9 +187,13 @@ def click_middle(elems, size, self) -> None:
 
     # check if elem already clicked
     mid = (floor(size / 2) * size) + ceil(size / 2)
-    # i forgot its indexed from 0 💀
-    elem = elems[mid - 1]
+    # i forgor its indexed from 0 💀
+    elem = WebDriverWait(self.driver, 10).until(
+        EC.element_to_be_clickable(elems[mid - 1])
+    )
+    # elem = elems[mid - 1]
     img = elem.find_element(By.TAG_NAME, "image")
+    # if it hasn't been clicked yet
     if img.get_dom_attribute("visibility") == "hidden":
         elem.click()
-        check_bingo_and_write_to_output(self)
+        # check_bingo_and_write_to_output(self)

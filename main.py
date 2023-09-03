@@ -23,7 +23,7 @@ class autobingo:
         cards_path="cards.txt",
         input_path="input.txt",
         output_path="output.txt",
-        timeout: int = 0.6,
+        timeout: int = 0.2,
         type: str = "normal",
         size: int = 5,
         reverse: bool = False,
@@ -78,13 +78,13 @@ class autobingo:
                 waitElement(self, "/html/body/div[1]/div/form/button").click()
                 # "OK" the rules
                 waitElement(self, "/html/body/div[1]/p[2]/button").click()
-                # check the free space in the middle (13th element)
+                # check the free space in the middle
                 elems = WebDriverWait(self.driver, 10).until(
                     EC.visibility_of_all_elements_located(
                         (By.CLASS_NAME, "bingo-card-svg g g")
                     )
                 )
-                cnt = 0
+                sleep(self.timeout)
                 click_middle(elems, self.size, self)
                 writeTheCards(self, str(self.driver.current_url))
             except TimeoutError:

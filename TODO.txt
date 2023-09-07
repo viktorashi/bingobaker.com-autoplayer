@@ -1,2 +1,5 @@
 DONE: fa functie separata de generate squares si da pass in la alea in fiecare functie de bigo in loc de self, ca asa nici nu te mai repeti nici nu mai depinzi frt awkward de instanta aia care nici macar nu e in ea
 El vede care carduri mai am da practic daca le vede pe celalalte goale nu i baiu, deci tre sa dau wipe la toate celallte in afara de ala care e bun inainte sa-i trimit lui
+
+
+SA DAI CLEAR LA TOATE CARDURILE INAINTE SA TRIMITI BINGOU

@@ -84,6 +84,9 @@ def find_words_click_and_return_num_of_found(self, input_phrases: list[str]) -> 
 
 def get_squares(self) -> [[bool]]:
     # must be used at the viewport already on that specific card, so function must be used right after finding new word on current page
+    """
+    returns the squares of the card that are checked in a 2d bool array
+    """
     squares: [[bool]] = []
     elems = WebDriverWait(self.driver, 10).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, "image"))
@@ -131,7 +134,7 @@ def check_blackout(size, squares) -> bool:
     return True
 
 
-def peen(size, squares) -> bool:
+def check_peen(size, squares) -> bool:
     # check middle collumn and bottom row
     for i in range(size):
         sum = 0
@@ -141,6 +144,18 @@ def peen(size, squares) -> bool:
             sum += 1
     if sum == 2 * size - 2:
         return True
+
+
+def check_3_in_6(size, squares) -> bool:
+    import numpy as np
+
+    arr = np.array(squares)
+    # check for any 3x3 squares of only true
+    for i in range(size - 2):
+        for j in range(size - 2):
+            if np.all(arr[i : i + 3, j : j + 3]):
+                return True
+    return False
 
 
 def check_bingo_and_write_to_output(self) -> bool:
@@ -154,7 +169,9 @@ def check_bingo_and_write_to_output(self) -> bool:
         case "blackout":
             check_bingo = check_blackout
         case "peen":
-            check_bingo = peen
+            check_bingo = check_peen
+        case "3in6":
+            check_bingo = check_3_in_6
 
     if check_bingo(self.size, get_squares(self)):
         curr_url = str(self.driver.current_url)
@@ -182,7 +199,10 @@ def read_from_config() -> dict:
 
 
 def click_middle(elems, size, self) -> None:
-    # size must be odd
+    # size must be odd for freespace to be in the center, else check where it is
+    if size % 2 == 0:
+        find_words_click_and_return_num_of_found(self, [self.free_space])
+        return
     from math import floor, ceil
 
     # check if elem already clicked

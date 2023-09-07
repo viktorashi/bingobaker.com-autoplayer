@@ -80,13 +80,13 @@ parser.add_argument(
     "--gamemode",
     help="The gamemode to play in. [default: normal] ",
     type=str,
-    choices=["normal", "blackout", "peen"],
+    choices=["normal", "blackout", "peen", "3in6"],
     dest="type",
 )
 parser.add_argument(
     "-s",
     "--size",
-    help="The size of the bingo card [default: 5 (must be odd, otherwise don't really make sense) ] ",
+    help="The size of the bingo card [default: 5 ] ",
     type=int,
     dest="size",
 )
@@ -104,8 +104,22 @@ parser.add_argument(
     action="store_true",
     dest="headless",
 )
+parser.add_argument(
+    "-strt",
+    "--start",
+    help="The index of the card to start doing anything from",
+    type=int,
+    dest="start",
+)
+parser.add_argument(
+    "-fs",
+    "--free-space",
+    help="Name of the freespace to search for in the card [default: 'no credit']",
+    type=str,
+    dest="free_space",
+)
 # the rest of the defaults are in the autobingo class definition
-parser.set_defaults(count=-1, mode="editconfig", driver="default")
+parser.set_defaults(count=-1, mode="editconfig", driver="default", start=0)
 
 # dict repr of the arguments, will need some cleaning up
 args = vars(parser.parse_args())
@@ -145,9 +159,12 @@ for arg in args:
         # arg == "count" : set it to 10
         # else pass
     else:
+        # because this is a default that we don't want to set in bingoconfig.json as it depends on the user's call of the program
         if not arg == "mode":
             options[arg] = args[arg]
 
+if options["gamemode"] == "3in6":
+    options["size"] = 6
 
 update_config(options)
 
@@ -196,6 +213,8 @@ from main import autobingo
 not_for_class = ["count", "headless"]
 # preparing it for the autobingo class
 input_options = {}
+
+
 for option in options:
     if not (option in not_for_class):
         input_options[option] = options[option]

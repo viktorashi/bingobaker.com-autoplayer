@@ -27,9 +27,9 @@ class autobingo:
         type: str = "normal",
         size: int = 5,
         reverse: bool = False,
+        start: int = 0,
+        free_space: str = "no credit",
     ) -> None:
-        if size % 2 == 0:
-            raise Exception("size must be odd")
         """
         driver : selenium.webdriver
         url : string of the bingomaker.com generator url
@@ -52,11 +52,14 @@ class autobingo:
         with open(input_path) as f:
             input_phrases = f.read().splitlines()
 
+        self.free_space = free_space
         self.reverse = reverse
         self.type = type
         self.input_phrases = input_phrases
         if self.reverse:
             cards.reverse()
+        if start > 0:
+            cards = cards[start:]
         self.cards: [str] = cards
         self.input_path: [str] = phrases
         self.driver = driver
@@ -90,7 +93,7 @@ class autobingo:
             except TimeoutError:
                 print(TimeoutError)
 
-    def mark_spots_list(self, input_phrases: list[str]) -> None:
+    def mark_spots_list(self, input_phrases: [str]) -> None:
         """'
         input_phrases : list of strings that will be searched for in the bingo card
         """

@@ -26,9 +26,8 @@ git clone https://github.com/viktorashi/bingobaker.com-autoplayer && cd bingobak
 python  autobingo.py -h
 ```
 ```string
-usage: autobingo [-h] [-d {chrome,edge,firefox,safari,ie,default}] [-u URL] [-cnt COUNT] [-i INPUT_PATH]
-                 [-o OUTPUT_PATH] [-c CARDS_PATH] [-t TIMEOUT] [-gm {normal,blackout,peen}] [-s SIZE] [-r]
-                 [-hdls]
+usage: autobingo [-h] [-d {chrome,edge,firefox,safari,ie,default}] [-u URL] [-cnt COUNT] [-i INPUT_PATH] [-o OUTPUT_PATH] [-c CARDS_PATH] [-t TIMEOUT]
+                 [-gm {normal,blackout,peen,3in6}] [-s SIZE] [-r] [-hdls] [-strt START] [-f FREE_SPACE]
                  [{editconfig,generate,checkbingos,mark,clear,markmid}]
 
 Auto Bingo playing command line tool. Currently only being used for bingobaker.com
@@ -51,15 +50,17 @@ options:
   -c CARDS_PATH, --cards CARDS_PATH
                         The path you want the cards to be saved in
   -t TIMEOUT, --timeout TIMEOUT
-                        Timeout in seconds for the webdriver to wait before clicking on each element to prevent
-                        malfunction [default : 0.2 ]
-  -gm {normal,blackout,peen}, --gamemode {normal,blackout,peen}
+                        Timeout in seconds for the webdriver to wait before clicking on each element to prevent malfunction [default : 0.2 ]
+  -gm {normal,blackout,peen,3in6}, --gamemode {normal,blackout,peen,3in6}
                         The gamemode to play in. [default: normal]
-  -s SIZE, --size SIZE  The size of the bingo card [default: 5 (must be odd, otherwise don't really make sense)
-                        ]
+  -s SIZE, --size SIZE  The size of the bingo card [default: 5 ]
   -r, --reverse         Reverse the bingo card order when reading from [cards.txt] [default False]
-  -hdls, --headless     Run the webdriver in headless mode (no interface for less VRAM consumption i think idk
-                        lol) [only possible for chrome, edge, firefox] [default False]
+  -hdls, --headless     Run the webdriver in headless mode (no interface for less VRAM consumption i think idk lol) [only possible for chrome, edge,
+                        firefox] [default False]
+  -strt START, --start START
+                        The index of the card to start doing anything from
+  -f FREE_SPACE, -free-space FREE_SPACE
+                        Name of the freespace to search for in the card [default: 'no credit']
 
 ion care how u use my code lol
 ```
@@ -139,6 +140,10 @@ python autobingo.py mark --reverse
 ```
 
 ### <font size=5> --headless <sub>[Bool, default: False, shorthand -hdls] </sub> </font>: Wether to run it in headless mode for less VRAM usage (only for edge, chrome and firefox)
+
+### <font size=5> --start <sub>[int, default: 0, shorthard -strt] </sub> </font>:  The index of the card to start doing anything from
+
+### <font size=5> --free-space <sub>[string, default: "no credit", shorthand -fs] </sub> </font>: The name of the freespace spot to check for if the card has an even size (meaning there is no clear midde spot)
 
 <h3><span style="color:#F47174"> 3. It will all be saved  </span></h3>
 

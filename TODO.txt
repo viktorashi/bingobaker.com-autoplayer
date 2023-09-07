@@ -5,4 +5,4 @@ El vede care carduri mai am da practic daca le vede pe celalalte goale nu i baiu
 
 SA DAI CLEAR LA TOATE CARDURILE INAINTE SA TRIMITI BINGOU
 
-sa dau uninstall la ce nu mai trebuie¡
+Contribute to playsound if it even has a public github sometime to make it macos python 10+ compatibble instead of halting

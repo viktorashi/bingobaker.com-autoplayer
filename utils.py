@@ -177,9 +177,9 @@ def check_bingo_and_write_to_output(self) -> bool:
         curr_url = str(self.driver.current_url)
         write_to_output(self, curr_url)
         # currently only works for macos but imma try to change it si maybe i also contribute to playsound library on github with python 10+ support
-        import os
+        # import os
 
-        os.system("afplay bruh.mp3")
+        # os.system("afplay bruh.mp3")
         return True
     return False
 

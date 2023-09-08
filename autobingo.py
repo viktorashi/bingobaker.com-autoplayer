@@ -163,8 +163,9 @@ for arg in args:
         if not arg == "mode":
             options[arg] = args[arg]
 
-if options["gamemode"] == "3in6":
-    options["size"] = 6
+if "gamemode" in  options:
+    if options["gamemode"] == "3in6":
+        options["size"] = 6
 
 update_config(options)
 

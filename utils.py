@@ -113,6 +113,9 @@ def get_squares(self) -> [[bool]]:
 
 
 def check_bingo_row_collumn_diagonal(size, squares) -> bool:
+    """
+    regular ass bingo
+    """
     # check bingo for elements in row, collumn or diagonal
     for i in range(size):
         if sum(squares[i]) == size:
@@ -127,6 +130,9 @@ def check_bingo_row_collumn_diagonal(size, squares) -> bool:
 
 
 def check_blackout(size, squares) -> bool:
+    """
+    full card
+    """
     # check if all squares are filled
     for i in range(size):
         if sum(squares[i]) != size:
@@ -135,6 +141,9 @@ def check_blackout(size, squares) -> bool:
 
 
 def check_peen(size, squares) -> bool:
+    """
+    shape of peen:
+    """
     # check middle collumn and bottom row
     for i in range(size):
         sum = 0
@@ -142,11 +151,14 @@ def check_peen(size, squares) -> bool:
             sum += 1
         if squares[size - 1][i] == 1:
             sum += 1
-    if sum == 2 * size - 2:
+    if sum == 2 * size - 1:
         return True
 
 
 def check_3_in_6(size, squares) -> bool:
+    """
+    3x3 squares insode 6x6 grid
+    """
     import numpy as np
 
     arr = np.array(squares)
@@ -155,6 +167,22 @@ def check_3_in_6(size, squares) -> bool:
         for j in range(size - 2):
             if np.all(arr[i : i + 3, j : j + 3]):
                 return True
+    return False
+
+
+def check_loser(size, squares) -> bool:
+    """
+    shape of an L on her forehead
+    """
+    # check first collumn and last row
+    cnt: int = 0
+    for i in range(size):
+        if squares[i][0]:
+            cnt += 1
+        if squares[size - 1][i]:
+            cnt += 1
+    if cnt == 2 * size - 1:
+        return True
     return False
 
 
@@ -172,6 +200,8 @@ def check_bingo_and_write_to_output(self) -> bool:
             check_bingo = check_peen
         case "3in6":
             check_bingo = check_3_in_6
+        case "loser":
+            check_bingo = check_loser
 
     if check_bingo(self.size, get_squares(self)):
         curr_url = str(self.driver.current_url)
@@ -201,9 +231,10 @@ def read_from_config() -> dict:
 
 def click_middle(elems, size, self) -> None:
     # size must be odd for freespace to be in the center, else check where it is
-    if size % 2 == 0:
+    if size % 2 == 0 or not self.free_space_in_middle:
         find_words_click_and_return_num_of_found(self, [self.free_space])
         return
+
     from math import floor, ceil
 
     # check if elem already clicked

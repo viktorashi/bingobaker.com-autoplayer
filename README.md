@@ -27,7 +27,7 @@ python  autobingo.py -h
 ```
 ```string
 usage: autobingo [-h] [-d {chrome,edge,firefox,safari,ie,default}] [-u URL] [-cnt COUNT] [-i INPUT_PATH] [-o OUTPUT_PATH] [-c CARDS_PATH] [-t TIMEOUT]
-                 [-gm {normal,blackout,peen,3in6}] [-s SIZE] [-r] [-hdls] [-strt START] [-f FREE_SPACE]
+                 [-gm {normal,blackout,peen,3in6,loser}] [-s SIZE] [-r] [-hdls] [-strt START] [-fs FREE_SPACE] [-fsm FREE_SPACE_IN_MIDDLE]
                  [{editconfig,generate,checkbingos,mark,clear,markmid}]
 
 Auto Bingo playing command line tool. Currently only being used for bingobaker.com
@@ -51,16 +51,17 @@ options:
                         The path you want the cards to be saved in
   -t TIMEOUT, --timeout TIMEOUT
                         Timeout in seconds for the webdriver to wait before clicking on each element to prevent malfunction [default : 0.2 ]
-  -gm {normal,blackout,peen,3in6}, --gamemode {normal,blackout,peen,3in6}
+  -gm {normal,blackout,peen,3in6,loser}, --gamemode {normal,blackout,peen,3in6,loser}
                         The gamemode to play in. [default: normal]
   -s SIZE, --size SIZE  The size of the bingo card [default: 5 ]
   -r, --reverse         Reverse the bingo card order when reading from [cards.txt] [default False]
-  -hdls, --headless     Run the webdriver in headless mode (no interface for less VRAM consumption i think idk lol) [only possible for chrome, edge,
-                        firefox] [default False]
+  -hdls, --headless     Run the webdriver in headless mode (no interface for less VRAM consumption i think idk lol) [only possible for chrome, edge, firefox] [default False]
   -strt START, --start START
                         The index of the card to start doing anything from
-  -f FREE_SPACE, -free-space FREE_SPACE
+  -fs FREE_SPACE, --free-space FREE_SPACE
                         Name of the freespace to search for in the card [default: 'no credit']
+  -fsm FREE_SPACE_IN_MIDDLE, --free-space-middle FREE_SPACE_IN_MIDDLE
+                        Whether to search for the freespace in the middle of the card [default: 1]
 
 ion care how u use my code lol
 ```
@@ -127,6 +128,8 @@ options:
  - norrmal : full row, collumn or diagonal
  - blackout : all spots
  - peen : form of a peepee ╭ᑎ╮ middle collumn bottom row
+ - 3in6 : 3x3 square inside 6x6 grid
+ - loser : shape of an L on her forehead (first collumn, last row)
 
 ### <font size=5> --size <sub>[default : 5, shorthand -s] </sub> </font>: Size of the board, must be odd cuz don't make sense otherwise, there would be no middle
 
@@ -144,6 +147,8 @@ python autobingo.py mark --reverse
 ### <font size=5> --start <sub>[int, default: 0, shorthard -strt] </sub> </font>:  The index of the card to start doing anything from
 
 ### <font size=5> --free-space <sub>[string, default: "no credit", shorthand -fs] </sub> </font>: The name of the freespace spot to check for if the card has an even size (meaning there is no clear midde spot)
+
+### <font size=5> --free-space-middle <sub>[int, default: 0, shorthand -fsm] </sub> </font>: Wether the free space is in the middle, if set to 1, it will start searching for the freespace text set earlier, (or the default) for it to be checked whenever a new card is created
 
 <h3><span style="color:#F47174"> 3. It will all be saved  </span></h3>
 

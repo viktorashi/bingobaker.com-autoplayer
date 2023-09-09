@@ -29,6 +29,7 @@ class autobingo:
         reverse: bool = False,
         start: int = 0,
         free_space: str = "no credit",
+        free_space_in_middle: int = 1,
     ) -> None:
         """
         driver : selenium.webdriver
@@ -52,6 +53,7 @@ class autobingo:
         with open(input_path) as f:
             input_phrases = f.read().splitlines()
 
+        self.free_space_in_middle = free_space_in_middle
         self.free_space = free_space
         self.reverse = reverse
         self.type = type
@@ -93,21 +95,28 @@ class autobingo:
             except TimeoutError:
                 print(TimeoutError)
 
+    def mark(self, input_phrases):
+        for indx, cardURL in enumerate(self.cards):
+            self.driver.get(cardURL)
+            found = find_words_click_and_return_num_of_found(self, input_phrases)
+            if found and check_bingo_and_write_to_output(self):
+                print(
+                    "CONGRATS YO YOU GOT A BINGOO!!!, check the output file for the link"
+                )
+            print(f"Checked card {indx}")
+
+    """
+    Wrappers:
+    """
+
     def mark_spots_list(self, input_phrases: [str]) -> None:
         """'
         input_phrases : list of strings that will be searched for in the bingo card
         """
         try:
             # obtains the cards links
-
             # for each card, find word from marking and check if, and if found check to see if that card has  a bingo, if yes report it to the logs along wit that card's link and print, continue on with the next card and go on
-            for cardURL in self.cards:
-                self.driver.get(cardURL)
-                found = find_words_click_and_return_num_of_found(self, input_phrases)
-                if found and check_bingo_and_write_to_output(self):
-                    print(
-                        "CONGRATS YO YOU GOT A BINGOO!!!, check the output file for the link"
-                    )
+            self.mark(input_phrases)
         except TimeoutError:
             print(TimeoutError)
 
@@ -123,16 +132,8 @@ class autobingo:
 
             with open(input_phrases) as f:
                 input_phrases = f.read().splitlines()
-
             print(input_phrases)
-
-            for cardURL in self.cards:
-                self.driver.get(cardURL)
-                found = find_words_click_and_return_num_of_found(self, input_phrases)
-                if found and check_bingo_and_write_to_output(self):
-                    print(
-                        "CONGRATS YO YOU GOT A BINGOO!!!, check the output file for the link"
-                    )
+            self.mark(input_phrases)
         except TimeoutError:
             print(TimeoutError)
 
@@ -143,15 +144,7 @@ class autobingo:
         try:
             # for each card, find word from marking and check if, and if found check to see if that card has  a bingo, if yes report it to the logs along wit that card's link and print, continue on with the next card and go on
             # get the input phrases as list from the file
-            for cardURL in self.cards:
-                self.driver.get(cardURL)
-                found = find_words_click_and_return_num_of_found(
-                    self, self.input_phrases
-                )
-                if found and check_bingo_and_write_to_output(self):
-                    print(
-                        "CONGRATS YO YOU GOT A BINGOO!!!, check the output file for the link"
-                    )
+            self.mark(self.input_phrases)
         except TimeoutError:
             print(TimeoutError)
 

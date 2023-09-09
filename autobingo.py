@@ -80,7 +80,7 @@ parser.add_argument(
     "--gamemode",
     help="The gamemode to play in. [default: normal] ",
     type=str,
-    choices=["normal", "blackout", "peen", "3in6"],
+    choices=["normal", "blackout", "peen", "3in6", "loser"],
     dest="type",
 )
 parser.add_argument(
@@ -117,6 +117,13 @@ parser.add_argument(
     help="Name of the freespace to search for in the card [default: 'no credit']",
     type=str,
     dest="free_space",
+)
+parser.add_argument(
+    "-fsm",
+    "--free-space-middle",
+    help="Whether to search for the freespace in the middle of the card [default: 1]",
+    dest="free_space_in_middle",
+    type=int,
 )
 # the rest of the defaults are in the autobingo class definition
 parser.set_defaults(count=-1, mode="editconfig", driver="default", start=0)
@@ -163,7 +170,7 @@ for arg in args:
         if not arg == "mode":
             options[arg] = args[arg]
 
-if "gamemode" in  options:
+if "gamemode" in options:
     if options["gamemode"] == "3in6":
         options["size"] = 6
 

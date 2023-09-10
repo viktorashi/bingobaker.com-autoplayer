@@ -77,13 +77,7 @@ parser.add_argument(
     choices=["normal", "blackout", "peen", "3in6", "loser"],
     dest="gamemode",
 )
-parser.add_argument(
-    "-s",
-    "--size",
-    help="The size of the bingo card [default: 5 ] ",
-    type=int,
-    dest="size",
-)
+
 parser.add_argument(
     "-r",
     "--reverse",
@@ -112,13 +106,8 @@ parser.add_argument(
     type=str,
     dest="free_space",
 )
-parser.add_argument(
-    "-fsm",
-    "--free-space-middle",
-    help="Whether to search for the freespace in the middle of the card [default: 1]",
-    dest="free_space_in_middle",
-    type=int,
-)
+
+
 # the rest of the defaults are in the autobingo class definition
 parser.set_defaults(count=-1, mode="editconfig", driver="default", start=0)
 
@@ -154,9 +143,7 @@ for arg in args:
                 case _:
                     pass
     else:
-        # because this is a default that we don't want to set in bingoconfig.json as it depends on the user's call of the program
-        if not arg == "mode":
-            options[arg] = args[arg]
+        options[arg] = args[arg]
 
 update_config(options)
 
@@ -216,10 +203,10 @@ match args["mode"]:
                 input_options["driver"] = webdriver.Chrome()
 
         # kinda like object destructuring in js
+
         bingo = autobingo(**input_options)
         bingo.createCards(options["count"])
         print("Cards generated! Check the cards.txt file for the links")
-
     case "check":
         bingo = autobingo(**input_options)
         bingo.check_bingo_of_all_cards()

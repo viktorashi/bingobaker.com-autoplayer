@@ -152,18 +152,7 @@ def check_bingos_and_write_to_output(self) -> None:
         case "loser":
             check_bingo = check_loser
 
-    cards: [dict] = read_cards_file(self)
-
-    # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
-    from math import ceil
-
-    mid = ceil(self.size / 2)
-    if not (self.free_space.lower() in cards[0]["squares"][mid][mid].lower()):
-        print("WARNING: free space not found in middle of card, updating config")
-        update_config_one_attr("free_space_in_middle", 0)
-    else:
-        print("free space found in middle of card, updating config")
-        update_config_one_attr("free_space_in_middle", 1)
+    cards: [dict] = self.cards
 
     winning_cards: [dict] = []
 
@@ -235,6 +224,47 @@ def read_from_output(self) -> [dict]:
             return json.loads(f.read())
     except FileNotFoundError:
         return []
+
+
+def update_card_size(self, elems) -> None:
+    if not self.gamemode == "3in6":
+        from math import sqrt
+
+        # automatically set the size of the card
+        self.size = int(sqrt(len(elems)))
+        update_config_one_attr("size", self.size)
+
+
+def update_if_free_space_in_middle(self, card):
+    from math import ceil
+
+    # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
+    mid = ceil(self.size / 2)
+    if not (self.free_space.lower() in card["squares"][mid][mid].lower()):
+        print("WARNING: free space not found in middle of card, updating config")
+        update_config_one_attr("free_space_in_middle", 0)
+    else:
+        print("free space found in middle of card, updating config")
+        update_config_one_attr("free_space_in_middle", 1)
+
+
+def create_card_return_card_details(self) -> dict:
+    # go to the website
+    self.driver.get(self.url)
+    # create card
+    waitElement(self, "/html/body/div[1]/div/form/button").click()
+    # "OK" the rules
+    waitElement(self, "/html/body/div[1]/p[2]/button").click()
+    # check the free space in the middle
+    elems = WebDriverWait(self.driver, 10).until(
+        EC.visibility_of_all_elements_located((By.CLASS_NAME, "bingo-card-svg g g"))
+    )
+
+    update_card_size(self, elems)
+
+    card_details = get_card_details(self, elems)
+    note_card(self, card_details)
+    return card_details
 
 
 # def playsound():

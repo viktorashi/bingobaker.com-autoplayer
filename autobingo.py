@@ -8,7 +8,7 @@ idei de cum sa fac comannd lineu
 e pe moduri: 
     - editconfig [defaultu daca nu e specificat]
     - generate
-    - checkbingos
+    - check
     - help 
     - mark
     - clear
@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "mode",
     help="The mode to run the program in. [default: editconfig]",
-    choices=["editconfig", "generate", "checkbingos", "mark", "clear", "markmid"],
+    choices=["editconfig", "generate", "check"],
     nargs="?",
 )
 
@@ -70,18 +70,12 @@ parser.add_argument(
     type=str,
 )
 parser.add_argument(
-    "-t",
-    "--timeout",
-    help="Timeout in seconds for the webdriver to wait before clicking on each element to prevent malfunction [default : 0.2 ]",
-    type=float,
-)
-parser.add_argument(
     "-gm",
     "--gamemode",
     help="The gamemode to play in. [default: normal] ",
     type=str,
     choices=["normal", "blackout", "peen", "3in6", "loser"],
-    dest="type",
+    dest="gamemode",
 )
 parser.add_argument(
     "-s",
@@ -159,20 +153,10 @@ for arg in args:
                     options["count"] = 10
                 case _:
                     pass
-        # if arg in bingoconfig.json: set it in options
-        # else: check if:
-        # arg == "mode": set it to "editconfig"
-        # arg == "driver": set it to "chrome"
-        # arg == "count" : set it to 10
-        # else pass
     else:
         # because this is a default that we don't want to set in bingoconfig.json as it depends on the user's call of the program
         if not arg == "mode":
             options[arg] = args[arg]
-
-if "gamemode" in options:
-    if options["gamemode"] == "3in6":
-        options["size"] = 6
 
 update_config(options)
 
@@ -188,36 +172,6 @@ for option in options:
     print(f"{option} : {options[option]}")
 
 
-match options["driver"]:
-    case "chrome":
-        if options["headless"]:
-            opts = webdriver.ChromeOptions()
-            opts.add_argument("--headless=new")
-            options["driver"] = webdriver.Chrome(options=opts)
-        else:
-            options["driver"] = webdriver.Chrome()
-    case "edge":
-        if options["headless"]:
-            opts = webdriver.EdgeOptions()
-            opts.add_argument("--headless=new")
-            options["driver"] = webdriver.Edge(options=opts)
-        else:
-            options["driver"] = webdriver.Edge()
-    case "firefox":
-        if options["headless"]:
-            opts = webdriver.FirefoxOptions()
-            opts.add_argument("--headless=new")
-            options["driver"] = webdriver.Firefox(options=opts)
-        else:
-            options["driver"] = webdriver.Firefox()
-    case "safari":
-        options["driver"] = webdriver.Safari()
-    case "ie":
-        options["driver"] = webdriver.Ie()
-    case _:
-        options["driver"] = webdriver.Chrome()
-from main import autobingo
-
 not_for_class = ["count", "headless"]
 # preparing it for the autobingo class
 input_options = {}
@@ -227,17 +181,45 @@ for option in options:
     if not (option in not_for_class):
         input_options[option] = options[option]
 
-bingo = autobingo(**input_options)
+from main import autobingo
+
 
 match args["mode"]:
     case "generate":
+        match options["driver"]:
+            case "chrome":
+                if options["headless"]:
+                    opts = webdriver.ChromeOptions()
+                    opts.add_argument("--headless=new")
+                    input_options["driver"] = webdriver.Chrome(options=opts)
+                else:
+                    input_options["driver"] = webdriver.Chrome()
+            case "edge":
+                if options["headless"]:
+                    opts = webdriver.EdgeOptions()
+                    opts.add_argument("--headless=new")
+                    input_options["driver"] = webdriver.Edge(options=opts)
+                else:
+                    input_options["driver"] = webdriver.Edge()
+            case "firefox":
+                if options["headless"]:
+                    opts = webdriver.FirefoxOptions()
+                    opts.add_argument("--headless=new")
+                    input_options["driver"] = webdriver.Firefox(options=opts)
+                else:
+                    input_options["driver"] = webdriver.Firefox()
+            case "safari":
+                input_options["driver"] = webdriver.Safari()
+            case "ie":
+                input_options["driver"] = webdriver.Ie()
+            case _:
+                input_options["driver"] = webdriver.Chrome()
+
+        # kinda like object destructuring in js
+        bingo = autobingo(**input_options)
         bingo.createCards(options["count"])
         print("Cards generated! Check the cards.txt file for the links")
-    case "checkbingos":
+
+    case "check":
+        bingo = autobingo(**input_options)
         bingo.check_bingo_of_all_cards()
-    case "mark":
-        bingo.mark_spots()
-    case "clear":
-        bingo.clear_all_cards()
-    case "markmid":
-        bingo.mark_all_middle_spots()

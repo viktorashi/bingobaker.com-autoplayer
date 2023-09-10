@@ -26,14 +26,16 @@ git clone https://github.com/viktorashi/bingobaker.com-autoplayer && cd bingobak
 python  autobingo.py -h
 ```
 ```string
-usage: autobingo [-h] [-d {chrome,edge,firefox,safari,ie,default}] [-u URL] [-cnt COUNT] [-i INPUT_PATH] [-o OUTPUT_PATH] [-c CARDS_PATH] [-t TIMEOUT]
-                 [-gm {normal,blackout,peen,3in6,loser}] [-s SIZE] [-r] [-hdls] [-strt START] [-fs FREE_SPACE] [-fsm FREE_SPACE_IN_MIDDLE]
-                 [{editconfig,generate,checkbingos,mark,clear,markmid}]
+usage: autobingo [-h] [-d {chrome,edge,firefox,safari,ie,default}] [-u URL] [-cnt COUNT]
+                 [-i INPUT_PATH] [-o OUTPUT_PATH] [-c CARDS_PATH]
+                 [-gm {normal,blackout,peen,3in6,loser}] [-s SIZE] [-r] [-hdls] [-strt START]
+                 [-fs FREE_SPACE] [-fsm FREE_SPACE_IN_MIDDLE]
+                 [{editconfig,generate,check}]
 
 Auto Bingo playing command line tool. Currently only being used for bingobaker.com
 
 positional arguments:
-  {editconfig,generate,checkbingos,mark,clear,markmid}
+  {editconfig,generate,check}
                         The mode to run the program in. [default: editconfig]
 
 options:
@@ -44,26 +46,30 @@ options:
   -cnt COUNT, --count COUNT
                         Number of bingo cards to generate from the generator link
   -i INPUT_PATH, --input INPUT_PATH
-                        The file containing the keywords to search for on the bingo cards [default: input.txt]
+                        The file containing the keywords to search for on the bingo cards
+                        [default: input.txt]
   -o OUTPUT_PATH, --output OUTPUT_PATH
-                        File to write the bingo'ed cards to [default: output.txt]
+                        File to write the bingo'ed cards to [default: output.json]
   -c CARDS_PATH, --cards CARDS_PATH
                         The path you want the cards to be saved in
-  -t TIMEOUT, --timeout TIMEOUT
-                        Timeout in seconds for the webdriver to wait before clicking on each element to prevent malfunction [default : 0.2 ]
   -gm {normal,blackout,peen,3in6,loser}, --gamemode {normal,blackout,peen,3in6,loser}
                         The gamemode to play in. [default: normal]
   -s SIZE, --size SIZE  The size of the bingo card [default: 5 ]
-  -r, --reverse         Reverse the bingo card order when reading from [cards.txt] [default False]
-  -hdls, --headless     Run the webdriver in headless mode (no interface for less VRAM consumption i think idk lol) [only possible for chrome, edge, firefox] [default False]
+  -r, --reverse         Reverse the bingo card order when reading from [cards.txt] [default
+                        False]
+  -hdls, --headless     Run the webdriver in headless mode (no interface for less VRAM
+                        consumption i think idk lol) [only possible for chrome, edge, firefox]
+                        [default False]
   -strt START, --start START
                         The index of the card to start doing anything from
   -fs FREE_SPACE, --free-space FREE_SPACE
                         Name of the freespace to search for in the card [default: 'no credit']
   -fsm FREE_SPACE_IN_MIDDLE, --free-space-middle FREE_SPACE_IN_MIDDLE
-                        Whether to search for the freespace in the middle of the card [default: 1]
+                        Whether to search for the freespace in the middle of the card
+                        [default: 1]
 
 ion care how u use my code lol
+
 ```
 for the operation and options
 
@@ -72,10 +78,7 @@ for the operation and options
 ### <font size=5> Positional arguments</font> reffer to the first thing you type after ```python autobingo.py```, meaning the function you want to execute, generating, checking the bingos, marking the spots (which includes checking the bingo's if any spots containing the keywords have been found), and clearing the cards in case jack got a bigo already :'( 
     
 - generate : generates {--count} bingo cards from the specified {--url}, writes their links to {--cards [default cards.txt]} (middle free space is always checked)
-- mark : starts checking each card from {--cards} to see if they contain any keywords from {--input}, if they do, they check for a bingo, which, if found will output the link of those cards tp {--output}
-- clear : clears the cards in {--cards} 
-- checkbingos :checks bingos for each card, will be less used since it automatically checks the bingo eitherway for each card as it searches
-- markmid : mark  all the middle free space spots for some reason i barely remember why i made this
+- check :checks bingos for each card, will be less used since it automatically checks the bingo eitherway for each card as it searches
 - editconfig : is the default behaviour if nothing specified, it does nothing but update the ***bingoconfig.json***
 
 ### <font size=5> --input <sub> [default: input.txt , shorthand -i]</sub> </font>  is the file in which you have the keywords you want to search for on the bingo cards, each keyword on a new line. They DON'T have to be specified exactly as in the cards, lowercase values will be compared and they can just contain  those strings 
@@ -85,8 +88,8 @@ freebooting a freebooted
 fake laugh
 bro
 ```
-### <font size=5> --output <sub>[default: output.txt, shorthand -o]</sub></font> : file that outputs the bingos 
-#### **`output.txt`**
+### <font size=5> --output <sub>[default: output.json, shorthand -o]</sub></font> : file that outputs the bingos 
+#### **`output.json`**
 ``` 
 https://bingobaker.com/#64e7dce5f63bda5a
 https://bingobaker.com/#64e7dce69d2d0c80
@@ -152,7 +155,7 @@ python autobingo.py mark --reverse
 
 <h3><span style="color:#F47174"> 3. It will all be saved  </span></h3>
 
-### Every parameter value you provide to the command will be saved in a file called ***bingoconfig.json*** right next to the program. <h3><span style="color:red"> DO NOT CHANGE THE CONFIG FILE DIRECTLY</span></h3>
+### Every parameter value you provide to the command will be saved in a file called ***bingoconfig.json*** right next to the program. Plus it will automatically check to see if the size provided is accurate to the card's size, if the free space is in the middle or not and update that in the config file <h3><span style="color:red"> DO NOT CHANGE THE CONFIG FILE DIRECTLY</span></h3>
 idk how well i've tested this but i believe it starts messing up if you do. But delete it all-togather if you have and it doesn't work anymore, it will just generate another one.
 
 
@@ -174,9 +177,9 @@ should do the job, then you would create an **input.txt** right next to this and
 
 ##### **`zsh`**
 ```bash
-python autobingo.py mark
+python autobingo.py check
 ```
-ez, peek into the console once in a while and see if it outputed anything about a congratilations, then go to output.txt to check it.
+ez, peek into the console once in a while and see if it outputed anything about a congratilations, then go to output.json to check it.
 #### This opens up Microsoft Edge browser and and generates 75 bingo cards with the generator link you have provided to it, the bingo's of which will be saved to the ***wins.txt*** file, also increases the timeout.
 
 ##### **`zsh`**

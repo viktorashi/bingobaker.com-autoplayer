@@ -2,9 +2,6 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import json
-from typing import Callable
-from time import sleep
 
 
 def waitElement(self, xpath: str) -> WebElement:
@@ -13,103 +10,54 @@ def waitElement(self, xpath: str) -> WebElement:
     )
 
 
-def waitElementSelector(self, selector: str) -> WebElement:
-    return WebDriverWait(self.driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, selector))
-    )
-
-
-def writeTheCards(self, link: str) -> None:
-    """
-    writes the link to the cards.txt file
-    """
-    self.cards.append(link)
-    with open(self.cards_path, "a") as f:
-        f.write(link + "\n")
-
-
-def clear_card(self) -> None:
-    """
-    clears the current card
-    must be used at the viewport already on that specific card, so function must be used right after navigating to current page
-    """
-    # this checks for free space
-    cnt = 0
-    waitElement(self, "/html/body/div[3]/a").click()
-
-    waitElement(self, "/html/body/div[3]/div/div[6]/a").click()
-
-    # switch to alert and accept
-    self.driver.switch_to.alert.accept()
-    # switch back to default content
-
-    self.driver.switch_to.default_content()
-
-    # wait for the page to load
-    # click on the free space
-    waitElementSelector(
-        self, "#svg > svg > g:nth-child(20) > g > text > tspan:nth-child(1)"
-    ).click()
-
-    """
-    mai sunt cateva clickuri
-    """
-    print(f"cleared {str( self.driver.current_url)}")
-
-
-def find_words_click_and_return_num_of_found(self, input_phrases: list[str]) -> int:
-    """
-    this must be run on the viewport that is already on that specific card, so function must be used right after navigating to current page
-
-    input_phrases : list[str]
-    """
-    cnt = 0
-    elems = WebDriverWait(self.driver, 10).until(
-        EC.visibility_of_all_elements_located((By.CLASS_NAME, "bingo-card-svg g g"))
-    )
-    for elem in elems:
-        # check if elem already clicked
-        img = elem.find_element(By.TAG_NAME, "image")
-        if img.get_dom_attribute("visibility") == "hidden":
-            texts = elem.find_elements(By.TAG_NAME, "tspan")
-            # transform list of strings by replacing \n with space and joining them
-            texts = " ".join([text.text.replace("\n", " ") for text in texts])
-            for phrase in input_phrases:
-                if phrase.lower() in texts.lower():
-                    sleep(self.timeout)
-                    elem.click()
-                    cnt += 1
-    return cnt
-
-
-def get_squares(self) -> [[bool]]:
-    # must be used at the viewport already on that specific card, so function must be used right after finding new word on current page
-    """
-    returns the squares of the card that are checked in a 2d bool array
-    """
-    squares: [[bool]] = []
-    elems = WebDriverWait(self.driver, 10).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "image"))
-    )
-    cnt = 0
-    row: [bool] = []
+def get_text_squares(self, elems) -> [[str]]:
+    squares: [[str]] = []
+    row: [str] = []
+    cnt: int = 0
     for elem in elems:
         cnt += 1
-        # XAPTHU SFANTTT
-        # xpath = f"/html/body/div[2]/*[local-name() = 'svg']/*[local-name()='g'][{i*5 + j + 1}]/*[local-name()='g']/*[local-name()='image']"
-        visibilty = elem.get_dom_attribute("visibility")
-
-        # daca e gol gen '' sau daca apare visibilty visib;e atunci e shown si doar daca apare hidden e hidden bruh
-
-        if visibilty == "visible" or visibilty == "":
-            row.append(1)
-        else:
-            row.append(0)
+        texts = elem.find_elements(By.TAG_NAME, "tspan")
+        phrase = " ".join([text.text.replace("\n", " ") for text in texts])
+        row.append(phrase)
         if cnt == self.size:
             squares.append(row)
             cnt = 0
             row = []
     return squares
+
+
+def get_card_details(self, elems) -> dict:
+    """
+    returns a dictionary of the url of the card and a 2d array of the phrases squares of the card
+    """
+    return {"url": self.driver.current_url, "squares": get_text_squares(self, elems)}
+
+
+def get_squares_completion(self, card: dict) -> [[bool]]:
+    """
+    returns the squares of the card that are checked in a 2d bool array
+    adds the completion 2d matrix value to the card for it to be printed to output
+    """
+    squares_completion: [[bool]] = [[0 for _ in range(5)] for _ in range(5)]
+    # have to search for the free space, it won't neccesarilly be in the middle
+    if self.size % 2 == 0 or (not self.free_space_in_middle):
+        self.input_phrases.append(self.free_space)
+    else:
+        # or, in if it is odd or in the middle, just check that middle
+        from math import ceil
+
+        mid = ceil(self.size / 2)
+        # i forgor its indexed from 0 💀
+        squares_completion[mid][mid] = 1
+    for i in range(self.size):
+        for j in range(self.size):
+            for input_phrase in self.input_phrases:
+                if input_phrase.lower() in card["squares"][i][j].lower():
+                    squares_completion[i][j] = 1
+                    break
+
+    card["completion"] = squares_completion
+    return squares_completion
 
 
 def check_bingo_row_collumn_diagonal(size, squares) -> bool:
@@ -186,12 +134,13 @@ def check_loser(size, squares) -> bool:
     return False
 
 
-def check_bingo_and_write_to_output(self) -> bool:
+def check_bingos_and_write_to_output(self) -> None:
     # this assumes the viewport is already on that specific card, so function must be used right after finding new word on current page
+    from typing import Callable
 
-    check_bigo: Callable[[any], bool]
+    check_bingo: Callable[[any], bool]
 
-    match self.type:
+    match self.gamemode:
         case "normal":
             check_bingo = check_bingo_row_collumn_diagonal
         case "blackout":
@@ -203,20 +152,60 @@ def check_bingo_and_write_to_output(self) -> bool:
         case "loser":
             check_bingo = check_loser
 
-    if check_bingo(self.size, get_squares(self)):
-        curr_url = str(self.driver.current_url)
-        write_to_output(self, curr_url)
-        # currently only works for macos but imma try to change it si maybe i also contribute to playsound library on github with python 10+ support
-        # import os
+    cards: [dict] = read_cards_file(self)
 
-        # os.system("afplay bruh.mp3")
-        return True
-    return False
+    # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
+    from math import ceil
+
+    mid = ceil(self.size / 2)
+    if not (self.free_space.lower() in cards[0]["squares"][mid][mid].lower()):
+        print("WARNING: free space not found in middle of card, updating config")
+        update_config_one_attr("free_space_in_middle", 0)
+    else:
+        print("free space found in middle of card, updating config")
+        update_config_one_attr("free_space_in_middle", 1)
+
+    winning_cards: [dict] = []
+
+    for card in cards:
+        # the following will add new attribute to card dict
+        if check_bingo(self.size, get_squares_completion(self, card)):
+            # for better conciseness and readability
+            del card["squares"]
+            winning_cards.append(card)
+            print("CONGRATS YOOO YOU GOT A BINGOO, check the output file for details")
+            # currently only plays sound and works for macos but imma try to change it si maybe i also contribute to playsound library on github with python 10+ support
+            # playsound()
+
+    if len(winning_cards) > 0:
+        print(winning_cards)
+        final_wins = winning_cards
+        previous_wins = read_from_output(self)
+        if len(previous_wins) > 0:
+            previous_urls = [card["url"] for card in previous_wins]
+            new_wins = [
+                card for card in winning_cards if card["url"] not in previous_urls
+            ]
+            new_wins.extend(previous_wins)
+            final_wins = new_wins
+        write_to_output(self, final_wins)
 
 
-def write_to_output(self, cardURL: str) -> None:
-    with open(self.output_path, "a+") as f:
-        f.write(cardURL + "\n")
+import json
+
+
+def note_card(self, card: dict) -> None:
+    """
+    writes the link to the cards.txt file
+    """
+    with open(self.cards_path, "a+") as f:
+        f.write(json.dumps(card))
+        f.write("\n")
+
+
+def write_to_output(self, cards: [dict]) -> None:
+    with open(self.output_path, "w+") as f:
+        f.write(json.dumps(cards))
 
 
 def update_config(options: dict):
@@ -224,28 +213,35 @@ def update_config(options: dict):
         f.write(json.dumps(options))
 
 
+def read_cards_file(self) -> [dict]:
+    with open(self.cards_path, "r") as f:
+        return [json.loads(line) for line in f.readlines()]
+
+
 def read_from_config() -> dict:
     with open("bingoconfig.json", "r") as f:
         return json.loads(f.read())
 
 
-def click_middle(elems, size, self) -> None:
-    # size must be odd for freespace to be in the center, else check where it is
-    if size % 2 == 0 or not self.free_space_in_middle:
-        find_words_click_and_return_num_of_found(self, [self.free_space])
-        return
+def update_config_one_attr(attr: str, value: any) -> None:
+    options = read_from_config()
+    options[attr] = value
+    update_config(options)
 
-    from math import floor, ceil
 
-    # check if elem already clicked
-    mid = (floor(size / 2) * size) + ceil(size / 2)
-    # i forgor its indexed from 0 💀
-    elem = WebDriverWait(self.driver, 10).until(
-        EC.element_to_be_clickable(elems[mid - 1])
-    )
-    # elem = elems[mid - 1]
-    img = elem.find_element(By.TAG_NAME, "image")
-    # if it hasn't been clicked yet
-    if img.get_dom_attribute("visibility") == "hidden":
-        elem.click()
-        # check_bingo_and_write_to_output(self)
+def read_from_output(self) -> [dict]:
+    try:
+        with open(self.output_path, "r") as f:
+            return json.loads(f.read())
+    except FileNotFoundError:
+        return []
+
+
+# def playsound():
+#     import sounddevice
+#     import soundfile
+
+#     filename = "bruh.wav"
+#     data, fs = soundfile.read(filename, dtype="float32")
+#     sounddevice.play(data, fs)
+#     status = sounddevice.wait()

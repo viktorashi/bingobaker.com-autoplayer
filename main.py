@@ -2,29 +2,26 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from time import sleep
 from utils import (
     waitElement,
-    writeTheCards,
-    clear_card,
-    find_words_click_and_return_num_of_found,
-    check_bingo_and_write_to_output,
-    click_middle,
+    note_card,
+    check_bingos_and_write_to_output,
+    get_card_details,
+    update_config_one_attr,
 )
 
-# do enums
+# do enums idk
 
 
 class autobingo:
     def __init__(
         self,
-        driver: webdriver,
+        driver: webdriver = "",
         url: str = "",
         cards_path="cards.txt",
         input_path="input.txt",
-        output_path="output.txt",
-        timeout: int = 0.2,
-        type: str = "normal",
+        output_path="output.json",
+        gamemode: str = "normal",
         size: int = 5,
         reverse: bool = False,
         start: int = 0,
@@ -41,35 +38,30 @@ class autobingo:
         """
         # turn input phrases file path into list of strings
 
-        phrases: [str]
-        with open(input_path) as f:
-            phrases = f.read().splitlines()
-
-        cards: [str]
-        with open(cards_path, "r+") as f:
-            cards = f.read().splitlines()
-
-        input_phrases: list[str]
+        input_phrases: [str]
         with open(input_path) as f:
             input_phrases = f.read().splitlines()
 
+        self.input_phrases = input_phrases
         self.free_space_in_middle = free_space_in_middle
         self.free_space = free_space
         self.reverse = reverse
-        self.type = type
-        self.input_phrases = input_phrases
+        self.gamemode = gamemode
+        self.driver = driver
+        self.url = url
+        self.input_path = input_path
+        self.output_path = output_path
+        self.cards_path = cards_path
+
         if self.reverse:
             cards.reverse()
         if start > 0:
             cards = cards[start:]
-        self.cards: [str] = cards
-        self.input_path: [str] = phrases
-        self.driver = driver
-        self.url = url
-        self.output_path = output_path
-        self.cards_path = cards_path
-        self.timeout = timeout
-        self.size = size
+
+        if gamemode == "3in6":
+            self.size = 6
+        else:
+            self.size = size
 
     def createCards(self, num: int) -> None:
         """
@@ -89,93 +81,21 @@ class autobingo:
                         (By.CLASS_NAME, "bingo-card-svg g g")
                     )
                 )
-                sleep(self.timeout)
-                click_middle(elems, self.size, self)
-                writeTheCards(self, str(self.driver.current_url))
+                from math import sqrt
+
+                # automatically set the size of the card
+                self.size = int(sqrt(len(elems)))
+                update_config_one_attr("size", self.size)
+
+                # this will be done in the mark function, and also the mark middle function doesn't really have a purpose anymore
+                # click_middle(elems, self.size, self)
+                card_details = get_card_details(self, elems)
+                note_card(self, card_details)
             except TimeoutError:
                 print(TimeoutError)
-
-    def mark(self, input_phrases):
-        for indx, cardURL in enumerate(self.cards):
-            self.driver.get(cardURL)
-            found = find_words_click_and_return_num_of_found(self, input_phrases)
-            if found and check_bingo_and_write_to_output(self):
-                print(
-                    "CONGRATS YO YOU GOT A BINGOO!!!, check the output file for the link"
-                )
-            print(f"Checked card {indx}")
-
-    """
-    Wrappers:
-    """
-
-    def mark_spots_list(self, input_phrases: [str]) -> None:
-        """'
-        input_phrases : list of strings that will be searched for in the bingo card
-        """
-        try:
-            # obtains the cards links
-            # for each card, find word from marking and check if, and if found check to see if that card has  a bingo, if yes report it to the logs along wit that card's link and print, continue on with the next card and go on
-            self.mark(input_phrases)
-        except TimeoutError:
-            print(TimeoutError)
-
-    def mark_spots_str(self, input_phrases: str) -> None:
-        """'
-        input_phrases : file containing the list of strings that will be searched for in the bingo card
-        """
-        try:
-            # obtains the cards links
-
-            # for each card, find word from marking and check if, and if found check to see if that card has  a bingo, if yes report it to the logs along wit that card's link and print, continue on with the next card and go on
-            # get the input phrases as list from the file
-
-            with open(input_phrases) as f:
-                input_phrases = f.read().splitlines()
-            print(input_phrases)
-            self.mark(input_phrases)
-        except TimeoutError:
-            print(TimeoutError)
-
-    def mark_spots(self) -> None:
-        """'
-        default for no file or list of words, uses the default input.txt file specified in the constructor
-        """
-        try:
-            # for each card, find word from marking and check if, and if found check to see if that card has  a bingo, if yes report it to the logs along wit that card's link and print, continue on with the next card and go on
-            # get the input phrases as list from the file
-            self.mark(self.input_phrases)
-        except TimeoutError:
-            print(TimeoutError)
-
-    def clear_all_cards(self) -> None:
-        """
-        clears all the cards from the cards.txt file
-        """
-        for cardURL in self.cards:
-            self.driver.get(cardURL)
-            clear_card(self)
 
     def check_bingo_of_all_cards(self) -> None:
         """
         checks bingo for all cards in the cards.txt file
         """
-        for cardURL in self.cards:
-            self.driver.get(cardURL)
-            check_bingo_and_write_to_output(self)
-
-    def mark_all_middle_spots(self) -> None:
-        for cardURL in self.cards:
-            try:
-                # go to the website
-                self.driver.get(cardURL)
-                # check the free space in the middle (13th element)
-                elems = WebDriverWait(self.driver, 50).until(
-                    EC.visibility_of_all_elements_located(
-                        (By.CLASS_NAME, "bingo-card-svg g g")
-                    )
-                )
-                click_middle(elems, self.size, self)
-                writeTheCards(self, str(self.driver.current_url))
-            except TimeoutError:
-                print(TimeoutError)
+        check_bingos_and_write_to_output(self)

@@ -88,8 +88,8 @@ parser.add_argument(
 parser.add_argument(
     "-hdls",
     "--headless",
-    help="Run the webdriver in headless mode (no interface for less VRAM consumption i think idk lol) [only possible for chrome, edge, firefox] [default False]",
-    action="store_true",
+    help="Run the webdriver in headless mode (no interface for less VRAM consumption i think idk lol) [only possible for chrome, edge, firefox] [default 1]",
+    action="int",
     dest="headless",
 )
 parser.add_argument(
@@ -109,7 +109,7 @@ parser.add_argument(
 
 
 # the rest of the defaults are in the autobingo class definition
-parser.set_defaults(count=-1, mode="editconfig", driver="default", start=0)
+parser.set_defaults(count=-1, mode="editconfig", driver="default", start=0, headless=1)
 
 # dict repr of the arguments, will need some cleaning up
 args = vars(parser.parse_args())
@@ -136,8 +136,6 @@ for arg in args:
             options[arg] = file_config[arg]
         else:
             match arg:
-                case "driver":
-                    options["driver"] = "chrome"
                 case "count":
                     options["count"] = 10
                 case _:
@@ -152,14 +150,13 @@ if args["mode"] == "editconfig":
     print(options)
     exit()
 
-from selenium import webdriver
 
 print("Options:")
 for option in options:
     print(f"{option} : {options[option]}")
 
 
-not_for_class = ["count", "headless"]
+not_for_class = ["count"]
 # preparing it for the autobingo class
 input_options = {}
 
@@ -170,43 +167,12 @@ for option in options:
 
 from main import autobingo
 
+# kinda like object destructuring in js
+bingo = autobingo(**input_options)
 
 match args["mode"]:
     case "generate":
-        match options["driver"]:
-            case "chrome":
-                if options["headless"]:
-                    opts = webdriver.ChromeOptions()
-                    opts.add_argument("--headless=new")
-                    input_options["driver"] = webdriver.Chrome(options=opts)
-                else:
-                    input_options["driver"] = webdriver.Chrome()
-            case "edge":
-                if options["headless"]:
-                    opts = webdriver.EdgeOptions()
-                    opts.add_argument("--headless=new")
-                    input_options["driver"] = webdriver.Edge(options=opts)
-                else:
-                    input_options["driver"] = webdriver.Edge()
-            case "firefox":
-                if options["headless"]:
-                    opts = webdriver.FirefoxOptions()
-                    opts.add_argument("--headless=new")
-                    input_options["driver"] = webdriver.Firefox(options=opts)
-                else:
-                    input_options["driver"] = webdriver.Firefox()
-            case "safari":
-                input_options["driver"] = webdriver.Safari()
-            case "ie":
-                input_options["driver"] = webdriver.Ie()
-            case _:
-                input_options["driver"] = webdriver.Chrome()
-
-        # kinda like object destructuring in js
-
-        bingo = autobingo(**input_options)
         bingo.createCards(options["count"])
         print("Cards generated! Check the cards.txt file for the links")
     case "check":
-        bingo = autobingo(**input_options)
         bingo.check_bingo_of_all_cards()

@@ -267,6 +267,39 @@ def create_card_return_card_details(self) -> dict:
     return card_details
 
 
+def init_driver(self):
+    from selenium import webdriver
+
+    match self.driver:
+        case "chrome":
+            if self.headless:
+                opts = webdriver.ChromeOptions()
+                opts.add_argument("--headless=new")
+                self.driver = webdriver.Chrome(options=opts)
+            else:
+                self.driver = webdriver.Chrome()
+        case "edge":
+            if self.headless:
+                opts = webdriver.EdgeOptions()
+                opts.add_argument("--headless=new")
+                self.driver = webdriver.Edge(options=opts)
+            else:
+                self.driver = webdriver.Edge()
+        case "firefox":
+            if self.headless:
+                opts = webdriver.FirefoxOptions()
+                opts.add_argument("--headless=new")
+                self.driver = webdriver.Firefox(options=opts)
+            else:
+                self.driver = webdriver.Firefox()
+        case "safari":
+            self.driver = webdriver.Safari()
+        case "ie":
+            self.driver = webdriver.Ie()
+        case _:
+            self.driver = webdriver.Chrome()
+
+
 # def playsound():
 #     import sounddevice
 #     import soundfile

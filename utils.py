@@ -8,14 +8,26 @@ def get_text_squares(self, squares) -> [[str]]:
     return phrases
 
 
-def get_card_details(self, url) -> dict:
+def get_and_set_bingo_id(html_code) -> None:
+    pattern = r'<script>\s*JS_PAGE = "\w+";\s*STATE = BigInt\("\d+"\);\s*SESSION_KEY = \'[\d\w]+\';\s*SEED = \'\d+\';\s*BINGO_ID = \'([^\"]+)\';\s*EDITED_ON = \'.*\'\s*</script>'
+
+    matches = re.findall(pattern, html_code)
+    if matches:
+        print("bingo_id:", matches[0])
+        update_config_one_attr("bingo_id", matches[0])
+
+
+def get_card_details(self, url, cnt) -> dict:
     """
     returns a dictionary of the url of the card and a 2d array of the phrases squares of the card
+    also sets the bingo_id of the game
     """
     from bs4 import BeautifulSoup
 
     response = requests.get(url)
     html_code = response.text
+    if cnt == 0:
+        get_and_set_bingo_id(html_code)
     soup = BeautifulSoup(html_code, "html.parser")
 
     lines = []
@@ -40,13 +52,13 @@ def get_squares_completion(self, card: dict) -> [[bool]]:
     """
     squares_completion: [[bool]] = [[0 for _ in range(5)] for _ in range(5)]
     # have to search for the free space, it won't neccesarilly be in the middle
-    if self.size % 2 == 0 or (not self.free_space_in_middle):
+    if self.size % 2 == 0 or (self.free_space_in_middle == 0):
         self.input_phrases.append(self.free_space)
     else:
         # or, in if it is odd or in the middle, just check that middle
         from math import ceil
 
-        mid = ceil(self.size / 2)
+        mid = ceil(self.size / 2) - 1
         # i forgor its indexed from 0 💀
         squares_completion[mid][mid] = 1
     for i in range(self.size):
@@ -156,13 +168,15 @@ def check_bingos_and_write_to_output(self) -> None:
     # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
     from math import ceil
 
-    mid = ceil(self.size / 2)
-    if not (self.free_space.lower() in cards[0]["squares"][mid][mid].lower()):
-        print("WARNING: free space not found in middle of card, updating config")
-        update_config_one_attr("free_space_in_middle", 0)
-    else:
+    mid = ceil(self.size / 2) - 1
+    if self.free_space.lower() in cards[0]["squares"][mid][mid].lower():
         print("free space found in middle of card, updating config")
         update_config_one_attr("free_space_in_middle", 1)
+        self.free_space_in_middle = 1
+    else:
+        print("WARNING: free space not found in middle of card, updating config")
+        update_config_one_attr("free_space_in_middle", 0)
+        self.free_space_in_middle = 0
 
     winning_cards: [dict] = []
 
@@ -178,8 +192,8 @@ def check_bingos_and_write_to_output(self) -> None:
             winning_cards.append(card)
             # currently only plays sound and works for macos but imma try to change it si maybe i also contribute to playsound library on github with python 10+ support
             # playsound()
-
     if len(winning_cards) > 0:
+        mark_winning_cards(self, winning_cards)
         final_wins = winning_cards
         previous_wins = read_from_output(self)
         if len(previous_wins) > 0:
@@ -191,33 +205,52 @@ def check_bingos_and_write_to_output(self) -> None:
             final_wins = new_wins
         write_to_output(self, final_wins)
 
-    cards: [dict] = self.cards
 
-    winning_cards: [dict] = []
+def mark_winning_cards(self, winning_cards: [dict]) -> None:
+    for card in winning_cards:
+        mark_bingo(self, card)
 
-    for card in cards:
-        # the following will add new attribute to card dict
 
-        if check_bingo(self.size, get_squares_completion(self, card)):
-            # for better conciseness and readability
-            del card["squares"]
-            winning_cards.append(card)
-            print("CONGRATS YOOO YOU GOT A BINGOO, check the output file for details")
-            # currently only plays sound and works for macos but imma try to change it si maybe i also contribute to playsound library on github with python 10+ support
-            # playsound()
+def mark_bingo(self, card: dict) -> None:
+    """
+    make self.size no. of threads and mark each square, use the bingo_id from self.bingo_id
+    """
+    pass
+    session = card["url"].split("/")[-1]
+    bingo_id = self.bingo_id
+    indexes: [int] = []
+    for i in range(self.size):
+        for j in range(self.size):
+            if card["completion"][i][j]:
+                indexes.append(i * self.size + j)
+    mark(session, bingo_id, indexes)
 
-    if len(winning_cards) > 0:
-        print(winning_cards)
-        final_wins = winning_cards
-        previous_wins = read_from_output(self)
-        if len(previous_wins) > 0:
-            previous_urls = [card["url"] for card in previous_wins]
-            new_wins = [
-                card for card in winning_cards if card["url"] not in previous_urls
-            ]
-            new_wins.extend(previous_wins)
-            final_wins = new_wins
-        write_to_output(self, final_wins)
+
+import asyncio, websockets
+from string import Template
+
+
+def mark(session: str, bingo_id: str, indexes: [int]):
+    """
+    session is the code for the current card
+    bingoid is the code for the generator link
+    both of these reffer to the charracters after the /play/ or # in the url
+    """
+
+    async def send_message():
+        async with websockets.connect(
+            f"wss://bingobaker.com/ws?type=handshake&bingo_id={bingo_id}&session_key={session}"
+        ) as websocket:
+            for index in indexes:
+                message = Template(
+                    '{"index": $index, "is_checked": 1, "type": "set_check", "bingo_id": "$bingo_id", "session_key": "$session_key"}'
+                )
+                message = message.substitute(
+                    index=index, bingo_id=bingo_id, session_key=session
+                )
+                await websocket.send(message)
+
+    asyncio.get_event_loop().run_until_complete(send_message())
 
 
 import json
@@ -304,6 +337,14 @@ def update_if_free_space_in_middle(self, card):
             update_config_one_attr("free_space_in_middle", 0)
 
 
+def generate_multiple_cards(self, num) -> None:
+    for i in range(num):
+        try:
+            generate_and_return_details(self)
+        except TimeoutError:
+            print(TimeoutError)
+
+
 def generate_card(url) -> str:
     """
     generates a card and returns its url in the good /play/ format
@@ -312,22 +353,19 @@ def generate_card(url) -> str:
     response = requests.post(url)
     pattern = r'<meta property="og:url" content="([^"]+)"'
     matches = re.findall(pattern, response.text)
-
     if matches:
-        session = matches[0]
-
-        return session
+        return matches[0]
     else:
         print("Error getting Session key")
-        return session
 
 
-def generate_and_return_details(self) -> dict:
+def generate_and_return_details(self, cnt=1) -> dict:
     """
     generates card, and looks into it to see details
     """
     url = generate_card(self.url)
-    card_details = get_card_details(self, url)
+    print(url)
+    card_details = get_card_details(self, url, cnt)
     note_card(self, card_details)
     return card_details
 

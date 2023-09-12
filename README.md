@@ -25,8 +25,8 @@ git clone https://github.com/viktorashi/bingobaker.com-autoplayer && cd bingobak
 python  autobingo.py -h
 ```
 ```string
-usage: autobingo [-h] [-u URL] [-cnt COUNT] [-i INPUT_PATH] [-o OUTPUT_PATH] [-c CARDS_PATH] [-gm {normal,blackout,peen,3in6,loser}] [-r]
-                 [-strt START] [-fs FREE_SPACE]
+usage: autobingo [-h] [-u URL] [-cnt COUNT] [-i INPUT_PATH] [-o OUTPUT_PATH] [-c CARDS_PATH] [-gm {normal,blackout,peen,3in6,loser}] [-r] [-strt START] [-fs FREE_SPACE]
+                 [-acc NUM_OF_THREADS]
                  [{editconfig,generate,check}]
 
 Auto Bingo playing command line tool. Currently only being used for bingobaker.com
@@ -43,7 +43,7 @@ options:
   -i INPUT_PATH, --input INPUT_PATH
                         The file containing the keywords to search for on the bingo cards [default: input.txt]
   -o OUTPUT_PATH, --output OUTPUT_PATH
-                        File to write the bingo'ed cards to [default: output.json]
+                        File to write the bingo'ed cards to [default: output.txt]
   -c CARDS_PATH, --cards CARDS_PATH
                         The path you want the cards to be saved in
   -gm {normal,blackout,peen,3in6,loser}, --gamemode {normal,blackout,peen,3in6,loser}
@@ -53,6 +53,8 @@ options:
                         The index of the card to start doing anything from
   -fs FREE_SPACE, --free-space FREE_SPACE
                         Name of the freespace to search for in the card [default: 'no credit']
+  -acc NUM_OF_THREADS, -accelleration NUM_OF_THREADS
+                        The number of threads to use for speeding up
 
 ion care how u use my code lol
 ```
@@ -65,6 +67,8 @@ for the operation and options
 - generate : generates {--count} bingo cards from the specified {--url}, writes their links to {--cards [default cards.txt]} (middle free space is always checked)
 - check :checks bingos for each card, will be less used since it automatically checks the bingo eitherway for each card as it searches
 - editconfig : is the default behaviour if nothing specified, it does nothing but update the ***bingoconfig.json***
+
+### <font size=5> --accelleration <sub> [default: 7 , shorthand -acc]</sub> </font>: The number of threads to use for speeding it up, careful: too many and it's won't really work that well, I suggest around 10-15 the max, it's plenty fast eitherway
 
 ### <font size=5> --input <sub> [default: input.txt , shorthand -i]</sub> </font>  is the file in which you have the keywords you want to search for on the bingo cards, each keyword on a new line. They DON'T have to be specified exactly as in the cards, lowercase values will be compared and they can just contain  those strings 
 #### **`inpux.txt`**
@@ -129,7 +133,7 @@ python autobingo.py mark --reverse
 <h3><span style="color:#F47174"> 3. It will all be saved  </span></h3>
 
 
-### Every parameter value you provide to the command will be saved in a file called ***bingoconfig.json*** right next to the program. Plus it will automatically check set the size to the card's size, if the free space is in the middle or not and update that in the config file <h3><span style="color:red"> DO NOT CHANGE THE CONFIG FILE DIRECTLY</span></h3>
+### Every parameter value you provide to the command will be saved in a file called ***bingoconfig.json*** right next to the program. Plus it will automatically check set the size to the card's size, if the free space is in the middle or not and update that in the config file. Found bingo's are automatically clicked as well<h3><span style="color:red"> DO NOT CHANGE THE CONFIG FILE DIRECTLY</span></h3>
 
 
 

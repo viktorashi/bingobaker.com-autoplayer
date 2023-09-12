@@ -1,3 +1,4 @@
+from threading import Thread
 from utils import (
     check_bingos_and_write_to_output,
     read_cards_file,
@@ -5,6 +6,7 @@ from utils import (
     generate_and_return_details,
     update_card_size,
     read_from_input,
+    generate_multiple_cards,
 )
 
 # do enums idk
@@ -25,6 +27,8 @@ class autobingo:
         free_space_in_middle: bool = False,
         headless: bool = True,
         size: int = 5,
+        bingo_id: str = "",
+        num_of_threads: int = 7,
     ) -> None:
         """
         driver : selenium.webdriver
@@ -36,6 +40,7 @@ class autobingo:
         """
         # turn input phrases file path into list of strings
         # dont mention input_path or cards_path if you're using the generate function
+        self.num_of_threads = num_of_threads
         self.free_space_in_middle = free_space_in_middle
         self.size = size
         self.input_path = input_path
@@ -48,6 +53,7 @@ class autobingo:
         self.url = url
         self.output_path = output_path
         self.headless = headless
+        self.bingo_id = bingo_id
 
         if gamemode == "3in6":
             self.size = 6
@@ -59,14 +65,25 @@ class autobingo:
         # check for the first card to update the details
         if self.url == "":
             raise ValueError("generate url not provided")
-        card = generate_and_return_details(self)
+
+        card = generate_and_return_details(self, 0)
         update_if_free_space_in_middle(self, card)
         update_card_size(self, card)
-        for _ in range(1, num):
-            try:
-                generate_and_return_details(self)
-            except TimeoutError:
-                print(TimeoutError)
+
+        threads = []
+        for _ in range(self.num_of_threads):
+            t = Thread(
+                target=generate_multiple_cards,
+                args=(self, int(num / self.num_of_threads)),
+            )
+            t.daemon = True
+            threads.append(t)
+
+        for thread in threads:
+            thread.start()
+
+        for thread in threads:
+            thread.join()
 
     def check_bingo_of_all_cards(self) -> None:
         """

@@ -1,36 +1,36 @@
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+import requests, re
 
 
-def waitElement(self, xpath: str) -> WebElement:
-    return WebDriverWait(self.driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, xpath))
-    )
+def get_text_squares(self, squares) -> [[str]]:
+    phrases: [[str]] = [["" for _ in range(self.size)] for _ in range(self.size)]
+    for square in squares:
+        phrases[square["row"]][square["col"]] = square["label"]
+    return phrases
 
 
-def get_text_squares(self, elems) -> [[str]]:
-    squares: [[str]] = []
-    row: [str] = []
-    cnt: int = 0
-    for elem in elems:
-        cnt += 1
-        texts = elem.find_elements(By.TAG_NAME, "tspan")
-        phrase = " ".join([text.text.replace("\n", " ") for text in texts])
-        row.append(phrase)
-        if cnt == self.size:
-            squares.append(row)
-            cnt = 0
-            row = []
-    return squares
-
-
-def get_card_details(self, elems) -> dict:
+def get_card_details(self, url) -> dict:
     """
     returns a dictionary of the url of the card and a 2d array of the phrases squares of the card
     """
-    return {"url": self.driver.current_url, "squares": get_text_squares(self, elems)}
+    from bs4 import BeautifulSoup
+
+    response = requests.get(url)
+    html_code = response.text
+    soup = BeautifulSoup(html_code, "html.parser")
+
+    lines = []
+    for i in range(5):
+        for j in range(5):
+            rect = soup.find("rect", {"data-row": str(i), "data-col": str(j)})
+            if rect:
+                # delete first 2 chars
+                rect["aria-label"] = rect["aria-label"][2:]
+                # delete newlines and replace with spaces
+                rect["aria-label"] = rect["aria-label"].replace("\n", " ")
+                line_data = {"row": i, "col": j, "label": rect["aria-label"]}
+                lines.append(line_data)
+
+    return {"url": url, "squares": get_text_squares(self, lines)}
 
 
 def get_squares_completion(self, card: dict) -> [[bool]]:
@@ -135,7 +135,6 @@ def check_loser(size, squares) -> bool:
 
 
 def check_bingos_and_write_to_output(self) -> None:
-    # this assumes the viewport is already on that specific card, so function must be used right after finding new word on current page
     from typing import Callable
 
     check_bingo: Callable[[any], bool]
@@ -152,12 +151,53 @@ def check_bingos_and_write_to_output(self) -> None:
         case "loser":
             check_bingo = check_loser
 
+    cards: [dict] = read_cards_file(self)
+
+    # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
+    from math import ceil
+
+    mid = ceil(self.size / 2)
+    if not (self.free_space.lower() in cards[0]["squares"][mid][mid].lower()):
+        print("WARNING: free space not found in middle of card, updating config")
+        update_config_one_attr("free_space_in_middle", 0)
+    else:
+        print("free space found in middle of card, updating config")
+        update_config_one_attr("free_space_in_middle", 1)
+
+    winning_cards: [dict] = []
+
+    for card in cards:
+        # the following will add new attribute to card dict
+        if check_bingo(self.size, get_squares_completion(self, card)):
+            # for better conciseness and readability
+            print("CONGRATS YOOO YOU GOT A BINGOO, check the output file for details")
+            print(card["url"])
+            for row in card["completion"]:
+                print(row)
+            del card["squares"]
+            winning_cards.append(card)
+            # currently only plays sound and works for macos but imma try to change it si maybe i also contribute to playsound library on github with python 10+ support
+            # playsound()
+
+    if len(winning_cards) > 0:
+        final_wins = winning_cards
+        previous_wins = read_from_output(self)
+        if len(previous_wins) > 0:
+            previous_urls = [card["url"] for card in previous_wins]
+            new_wins = [
+                card for card in winning_cards if card["url"] not in previous_urls
+            ]
+            new_wins.extend(previous_wins)
+            final_wins = new_wins
+        write_to_output(self, final_wins)
+
     cards: [dict] = self.cards
 
     winning_cards: [dict] = []
 
     for card in cards:
         # the following will add new attribute to card dict
+
         if check_bingo(self.size, get_squares_completion(self, card)):
             # for better conciseness and readability
             del card["squares"]
@@ -183,18 +223,8 @@ def check_bingos_and_write_to_output(self) -> None:
 import json
 
 
-def note_card(self, card: dict) -> None:
-    """
-    writes the link to the cards.txt file
-    """
-    with open(self.cards_path, "a+") as f:
-        f.write(json.dumps(card))
-        f.write("\n")
-
-
-def write_to_output(self, cards: [dict]) -> None:
-    with open(self.output_path, "w+") as f:
-        f.write(json.dumps(cards))
+def format_link(url):
+    return url.replace("#", "play/")
 
 
 def update_config(options: dict):
@@ -207,9 +237,43 @@ def read_cards_file(self) -> [dict]:
         return [json.loads(line) for line in f.readlines()]
 
 
+def note_card(self, card: dict) -> None:
+    """
+    writes the link to the cards.txt file
+    """
+    card["url"] = format_link(card["url"])
+    with open(self.cards_path, "a+") as f:
+        f.write(json.dumps(card))
+        f.write("\n")
+
+
 def read_from_config() -> dict:
-    with open("bingoconfig.json", "r") as f:
-        return json.loads(f.read())
+    try:
+        with open("bingoconfig.json", "r") as f:
+            return json.loads(f.read())
+    except:
+        return {}
+
+
+def read_from_input(self) -> [str]:
+    with open(self.input_path) as f:
+        input_phrases = f.read().splitlines()
+        if input_phrases == []:
+            raise ValueError("input file is empty")
+        return input_phrases
+
+
+def write_to_output(self, cards: [dict]) -> None:
+    with open(self.output_path, "w+") as f:
+        f.write(json.dumps(cards))
+
+
+def read_from_output(self) -> [dict]:
+    try:
+        with open(self.output_path, "r") as f:
+            return json.loads(f.read())
+    except:
+        return []
 
 
 def update_config_one_attr(attr: str, value: any) -> None:
@@ -218,86 +282,54 @@ def update_config_one_attr(attr: str, value: any) -> None:
     update_config(options)
 
 
-def read_from_output(self) -> [dict]:
-    try:
-        with open(self.output_path, "r") as f:
-            return json.loads(f.read())
-    except FileNotFoundError:
-        return []
-
-
-def update_card_size(self, elems) -> None:
+def update_card_size(self, card) -> None:
     if not self.gamemode == "3in6":
-        from math import sqrt
-
         # automatically set the size of the card
-        self.size = int(sqrt(len(elems)))
+        self.size = len(card["squares"][0])
         update_config_one_attr("size", self.size)
+        print("size of card updated to", self.size)
 
 
 def update_if_free_space_in_middle(self, card):
-    from math import ceil
+    if self.size % 2 == 1:
+        from math import ceil
 
-    # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
-    mid = ceil(self.size / 2)
-    if not (self.free_space.lower() in card["squares"][mid][mid].lower()):
-        print("WARNING: free space not found in middle of card, updating config")
-        update_config_one_attr("free_space_in_middle", 0)
+        # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
+        mid = ceil(self.size / 2) - 1
+        if self.free_space.lower() in card["squares"][mid][mid].lower():
+            print("free space found in middle of card, updating config")
+            update_config_one_attr("free_space_in_middle", 1)
+        else:
+            print("WARNING: free space not found in middle of card, updating config")
+            update_config_one_attr("free_space_in_middle", 0)
+
+
+def generate_card(url) -> str:
+    """
+    generates a card and returns its url in the good /play/ format
+    """
+
+    response = requests.post(url)
+    pattern = r'<meta property="og:url" content="([^"]+)"'
+    matches = re.findall(pattern, response.text)
+
+    if matches:
+        session = matches[0]
+
+        return session
     else:
-        print("free space found in middle of card, updating config")
-        update_config_one_attr("free_space_in_middle", 1)
+        print("Error getting Session key")
+        return session
 
 
-def create_card_return_card_details(self) -> dict:
-    # go to the website
-    self.driver.get(self.url)
-    # create card
-    waitElement(self, "/html/body/div[1]/div/form/button").click()
-    # "OK" the rules
-    waitElement(self, "/html/body/div[1]/p[2]/button").click()
-    # check the free space in the middle
-    elems = WebDriverWait(self.driver, 10).until(
-        EC.visibility_of_all_elements_located((By.CLASS_NAME, "bingo-card-svg g g"))
-    )
-
-    update_card_size(self, elems)
-
-    card_details = get_card_details(self, elems)
+def generate_and_return_details(self) -> dict:
+    """
+    generates card, and looks into it to see details
+    """
+    url = generate_card(self.url)
+    card_details = get_card_details(self, url)
     note_card(self, card_details)
     return card_details
-
-
-def init_driver(self):
-    from selenium import webdriver
-
-    match self.driver:
-        case "chrome":
-            if self.headless:
-                opts = webdriver.ChromeOptions()
-                opts.add_argument("--headless=new")
-                self.driver = webdriver.Chrome(options=opts)
-            else:
-                self.driver = webdriver.Chrome()
-        case "edge":
-            if self.headless:
-                opts = webdriver.EdgeOptions()
-                opts.add_argument("--headless=new")
-                self.driver = webdriver.Edge(options=opts)
-            else:
-                self.driver = webdriver.Edge()
-        case "firefox":
-            if self.headless:
-                opts = webdriver.FirefoxOptions()
-                opts.add_argument("--headless=new")
-                self.driver = webdriver.Firefox(options=opts)
-            else:
-                self.driver = webdriver.Firefox()
-        case "safari":
-            self.driver = webdriver.Safari()
-        case "ie":
-            self.driver = webdriver.Ie()
-        case _:
-            self.driver = webdriver.Chrome()
 
 
 # def playsound():

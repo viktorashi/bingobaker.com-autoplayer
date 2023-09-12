@@ -27,14 +27,6 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-d",
-    "--driver",
-    help="The web browser to use. [default: chrome] Recommended: chrome, edge",
-    choices=["chrome", "edge", "firefox", "safari", "ie", "default"],
-    type=str,
-    dest="driver",
-)
-parser.add_argument(
     "-u",
     "--url",
     help="The link to the bingo card generator",
@@ -85,13 +77,7 @@ parser.add_argument(
     action="store_true",
     dest="reverse",
 )
-parser.add_argument(
-    "-hdls",
-    "--headless",
-    help="Run the webdriver in headless mode (no interface for less VRAM consumption i think idk lol) [only possible for chrome, edge, firefox] [default 1]",
-    action="int",
-    dest="headless",
-)
+
 parser.add_argument(
     "-strt",
     "--start",
@@ -109,7 +95,7 @@ parser.add_argument(
 
 
 # the rest of the defaults are in the autobingo class definition
-parser.set_defaults(count=-1, mode="editconfig", driver="default", start=0, headless=1)
+parser.set_defaults(count=-1, mode="editconfig")
 
 # dict repr of the arguments, will need some cleaning up
 args = vars(parser.parse_args())
@@ -119,16 +105,16 @@ options = {}
 
 # Pentru fiecare argument, daca e default sau None o sa luam din bingoconfig.json valoarea lui, daca nu e acolo atunci lasi asa si nu adaugi nimic in options ca o sa ia optiunea default automat din clasa autobingo
 
-from utils import update_config, read_from_config
+from utils import update_config, read_from_config, format_link
 
 file_config: dict
 
-try:
-    file_config = read_from_config()
-except FileNotFoundError:
-    file_config = {}
+
+file_config = read_from_config()
+print(file_config)
 
 
+# if not mentioned in the command line arguments, read from bingoconfig.json and it if it is'nt there set the defaults
 for arg in args:
     if (args[arg] == None) or (args[arg] == -1) or (args[arg] == "default"):
         # read from bingoconfig.json
@@ -137,12 +123,25 @@ for arg in args:
         else:
             match arg:
                 case "count":
-                    options["count"] = 10
+                    options["count"] = 100
                 case _:
                     pass
-    else:
+    elif not arg == "mode":
         options[arg] = args[arg]
 
+# this is not for the simpletons, code will figure it out
+options_for_class_not_user = ["free_space_in_middle", "size"]
+for option in options_for_class_not_user:
+    if option in file_config:
+        options[option] = file_config[option]
+    else:
+        match option:
+            case "free_space_in_middle":
+                options["free_space_in_middle"] = False
+            case "size":
+                options["size"] = 5
+if "url" in options:
+    options["url"] = format_link(options["url"])
 update_config(options)
 
 if args["mode"] == "editconfig":
@@ -172,6 +171,7 @@ bingo = autobingo(**input_options)
 
 match args["mode"]:
     case "generate":
+        print(f"Generating {options['count']} cards from {options['url']}")
         bingo.createCards(options["count"])
         print("Cards generated! Check the cards.txt file for the links")
     case "check":

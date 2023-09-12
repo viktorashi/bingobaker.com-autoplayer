@@ -1,13 +1,10 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.wait import WebDriverWait
 from utils import (
     check_bingos_and_write_to_output,
     read_cards_file,
     update_if_free_space_in_middle,
-    create_card_return_card_details,
-    init_driver,
+    generate_and_return_details,
+    update_card_size,
+    read_from_input,
 )
 
 # do enums idk
@@ -25,7 +22,9 @@ class autobingo:
         reverse: bool = False,
         start: int = 0,
         free_space: str = "no credit",
+        free_space_in_middle: bool = False,
         headless: bool = True,
+        size: int = 5,
     ) -> None:
         """
         driver : selenium.webdriver
@@ -37,7 +36,8 @@ class autobingo:
         """
         # turn input phrases file path into list of strings
         # dont mention input_path or cards_path if you're using the generate function
-
+        self.free_space_in_middle = free_space_in_middle
+        self.size = size
         self.input_path = input_path
         self.cards_path = cards_path
         self.start = start
@@ -58,12 +58,13 @@ class autobingo:
         """
         # check for the first card to update the details
         if self.url == "":
-            raise ValueError("url not provided")
-        init_driver(self)
-        update_if_free_space_in_middle(self, create_card_return_card_details(self))
+            raise ValueError("generate url not provided")
+        card = generate_and_return_details(self)
+        update_if_free_space_in_middle(self, card)
+        update_card_size(self, card)
         for _ in range(1, num):
             try:
-                create_card_return_card_details(self)
+                generate_and_return_details(self)
             except TimeoutError:
                 print(TimeoutError)
 
@@ -72,14 +73,8 @@ class autobingo:
         checks bingo for all cards in the cards.txt file
         """
         # innit the reading and changing of the files
-        input_phrases: [str]
-        with open(self.input_path) as f:
-            input_phrases = f.read().splitlines()
 
-        if input_phrases == []:
-            raise ValueError("input file is empty/ inexistent")
-
-        self.input_phrases = input_phrases
+        self.input_phrases = read_from_input(self)
 
         cards: [str] = read_cards_file(self)
         if self.reverse:

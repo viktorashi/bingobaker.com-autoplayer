@@ -168,16 +168,6 @@ def check_bingos_and_write_to_output(self) -> None:
     # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
     from math import ceil
 
-    mid = ceil(self.size / 2) - 1
-    if self.free_space.lower() in cards[0]["squares"][mid][mid].lower():
-        print("free space found in middle of card, updating config")
-        update_config_one_attr("free_space_in_middle", 1)
-        self.free_space_in_middle = 1
-    else:
-        print("WARNING: free space not found in middle of card, updating config")
-        update_config_one_attr("free_space_in_middle", 0)
-        self.free_space_in_middle = 0
-
     winning_cards: [dict] = []
 
     for card in cards:
@@ -185,7 +175,11 @@ def check_bingos_and_write_to_output(self) -> None:
         if check_bingo(self.size, get_squares_completion(self, card)):
             # for better conciseness and readability
             print("CONGRATS YOOO YOU GOT A BINGOO, check the output file for details")
+            # last 6 charracters of the link
+            card["key"] = f'!bingowin #{ card["url"][-6:]}'
+
             print(card["url"])
+            print(card["key"])
             for row in card["completion"]:
                 print(row)
             del card["squares"]

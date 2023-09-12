@@ -92,7 +92,13 @@ parser.add_argument(
     type=str,
     dest="free_space",
 )
-
+parser.add_argument(
+    "-acc",
+    "-accelleration",
+    help="The number of threads to use for speeding up",
+    type=int,
+    dest="num_of_threads",
+)
 
 # the rest of the defaults are in the autobingo class definition
 parser.set_defaults(count=-1, mode="editconfig")
@@ -130,7 +136,7 @@ for arg in args:
         options[arg] = args[arg]
 
 # this is not for the simpletons, code will figure it out
-options_for_class_not_user = ["free_space_in_middle", "size"]
+options_for_class_not_user = ["free_space_in_middle", "size", "bingo_id"]
 for option in options_for_class_not_user:
     if option in file_config:
         options[option] = file_config[option]

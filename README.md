@@ -172,7 +172,7 @@ at the top of your adjecent python file
 
 
 <h1>Credits</h1>
-@Itamar1337 - thanks for making it actually usable and and not have this script impose the same effect a TNT minecraft nuke bomb has on your pc
 
+[Itamar1337](https://github.com/Itamar1337) - thanks for making it actually usable and and not have this script impose the same effect a TNT minecraft nuke bomb has on your pc
 
 bye bruh

@@ -7,6 +7,7 @@ from utils import (
     update_card_size,
     read_from_input,
     generate_multiple_cards,
+    update_config_one_attr,
 )
 
 # do enums idk
@@ -57,6 +58,9 @@ class autobingo:
 
         if gamemode == "3in6":
             self.size = 6
+            update_config_one_attr("size", 6)
+            update_config_one_attr("free_space_in_middle", False)
+            print("Updating size to 6 and free space in middle for 3in6 gamemode")
 
     def createCards(self, num: int) -> None:
         """

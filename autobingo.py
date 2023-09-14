@@ -66,7 +66,7 @@ parser.add_argument(
     "--gamemode",
     help="The gamemode to play in. [default: normal] ",
     type=str,
-    choices=["normal", "blackout", "peen", "3in6", "loser"],
+    choices=["normal", "blackout", "peen", "3in6", "loser", "4corners", "X", "x"],
     dest="gamemode",
 )
 
@@ -181,4 +181,5 @@ match args["mode"]:
         bingo.createCards(options["count"])
         print("Cards generated! Check the cards.txt file for the links")
     case "check":
+        print("Checking to see if my mans (or gals) got a bingo....")
         bingo.check_bingo_of_all_cards()

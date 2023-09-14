@@ -31,8 +31,8 @@ def get_card_details(self, url, cnt) -> dict:
     soup = BeautifulSoup(html_code, "html.parser")
 
     lines = []
-    for i in range(5):
-        for j in range(5):
+    for i in range(self.size):
+        for j in range(self.size):
             rect = soup.find("rect", {"data-row": str(i), "data-col": str(j)})
             if rect:
                 # delete first 2 chars
@@ -50,9 +50,11 @@ def get_squares_completion(self, card: dict) -> [[bool]]:
     returns the squares of the card that are checked in a 2d bool array
     adds the completion 2d matrix value to the card for it to be printed to output
     """
-    squares_completion: [[bool]] = [[0 for _ in range(5)] for _ in range(5)]
+    squares_completion: [[bool]] = [
+        [0 for _ in range(self.size)] for _ in range(self.size)
+    ]
     # have to search for the free space, it won't neccesarilly be in the middle
-    if self.size % 2 == 0 or (self.free_space_in_middle == 0):
+    if self.size % 2 == 0 or not self.free_space_in_middle:
         self.input_phrases.append(self.free_space)
     else:
         # or, in if it is odd or in the middle, just check that middle
@@ -72,7 +74,7 @@ def get_squares_completion(self, card: dict) -> [[bool]]:
     return squares_completion
 
 
-def check_bingo_row_collumn_diagonal(size, squares) -> bool:
+def check_bingo_row_collumn_diagonal(size, squares: [[bool]]) -> bool:
     """
     regular ass bingo
     """
@@ -89,7 +91,7 @@ def check_bingo_row_collumn_diagonal(size, squares) -> bool:
     return False
 
 
-def check_blackout(size, squares) -> bool:
+def check_blackout(size, squares: [[bool]]) -> bool:
     """
     full card
     """
@@ -100,7 +102,7 @@ def check_blackout(size, squares) -> bool:
     return True
 
 
-def check_peen(size, squares) -> bool:
+def check_peen(size, squares: [[bool]]) -> bool:
     """
     shape of peen:
     """
@@ -115,7 +117,7 @@ def check_peen(size, squares) -> bool:
         return True
 
 
-def check_3_in_6(size, squares) -> bool:
+def check_3_in_6(size, squares: [[bool]]) -> bool:
     """
     3x3 squares insode 6x6 grid
     """
@@ -130,7 +132,7 @@ def check_3_in_6(size, squares) -> bool:
     return False
 
 
-def check_loser(size, squares) -> bool:
+def check_loser(size, squares: [[bool]]) -> bool:
     """
     shape of an L on her forehead
     """
@@ -146,12 +148,43 @@ def check_loser(size, squares) -> bool:
     return False
 
 
+def check_4_corners(size, squares: [[bool]]) -> bool:
+    """
+    4 corners
+    """
+
+    if (
+        squares[0][0]
+        and squares[0][size - 1]
+        and squares[size - 1][0]
+        and squares[size - 1][size - 1]
+    ):
+        return True
+    return False
+
+
+def check_x(size, squares: [[bool]]) -> bool:
+    """
+    shape of an X
+    """
+    # check first collumn and last row
+    cnt: int = 0
+    for i in range(size):
+        if squares[i][i]:
+            cnt += 1
+        if squares[size - 1 - i][i]:
+            cnt += 1
+    if cnt == 2 * size - 1:
+        return True
+    return False
+
+
 def check_bingos_and_write_to_output(self) -> None:
     from typing import Callable
 
     check_bingo: Callable[[any], bool]
 
-    match self.gamemode:
+    match self.gamemode.lower():
         case "normal":
             check_bingo = check_bingo_row_collumn_diagonal
         case "blackout":
@@ -162,14 +195,54 @@ def check_bingos_and_write_to_output(self) -> None:
             check_bingo = check_3_in_6
         case "loser":
             check_bingo = check_loser
-
-    cards: [dict] = read_cards_file(self)
+        case "4corners":
+            check_bingo = check_4_corners
+        case "x":
+            check_bingo = check_x
 
     # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
     from math import ceil
 
     winning_cards: [dict] = []
 
+    from threading import Thread
+
+    # split the cards into chunnks of self.num_of_threads and check them in parallel, joining them later, run the check_part_of_cards function on each chunk
+    leng = len(self.cards)
+    cards_chunks = [
+        self.cards[i : i + int(leng / self.num_of_threads)]
+        for i in range(0, leng, int(leng / self.num_of_threads))
+    ]
+
+    threads = []
+    for chunk in cards_chunks:
+        t = Thread(
+            target=check_part_of_cards, args=(self, chunk, check_bingo, winning_cards)
+        )
+        t.daemon = True
+        threads.append(t)
+
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    if len(winning_cards) > 0:
+        mark_winning_cards(self, winning_cards)
+        final_wins = winning_cards
+        previous_wins = read_from_output(self)
+        if len(previous_wins) > 0:
+            previous_urls = [card["url"] for card in previous_wins]
+            new_wins = [
+                card for card in winning_cards if card["url"] not in previous_urls
+            ]
+            new_wins.extend(previous_wins)
+            final_wins = new_wins
+        write_to_output(self, final_wins)
+
+
+def check_part_of_cards(self, cards: [dict], check_bingo, winning_cards) -> [dict]:
     for card in cards:
         # the following will add new attribute to card dict
         if check_bingo(self.size, get_squares_completion(self, card)):
@@ -186,18 +259,6 @@ def check_bingos_and_write_to_output(self) -> None:
             winning_cards.append(card)
             # currently only plays sound and works for macos but imma try to change it si maybe i also contribute to playsound library on github with python 10+ support
             # playsound()
-    if len(winning_cards) > 0:
-        mark_winning_cards(self, winning_cards)
-        final_wins = winning_cards
-        previous_wins = read_from_output(self)
-        if len(previous_wins) > 0:
-            previous_urls = [card["url"] for card in previous_wins]
-            new_wins = [
-                card for card in winning_cards if card["url"] not in previous_urls
-            ]
-            new_wins.extend(previous_wins)
-            final_wins = new_wins
-        write_to_output(self, final_wins)
 
 
 def mark_winning_cards(self, winning_cards: [dict]) -> None:
@@ -260,8 +321,12 @@ def update_config(options: dict):
 
 
 def read_cards_file(self) -> [dict]:
-    with open(self.cards_path, "r") as f:
-        return [json.loads(line) for line in f.readlines()]
+    try:
+        with open(self.cards_path, "r") as f:
+            return [json.loads(line) for line in f.readlines()]
+            # check fi file is empty
+    except:
+        raise Exception("nah, you aint got no cards")
 
 
 def note_card(self, card: dict) -> None:
@@ -323,12 +388,9 @@ def update_if_free_space_in_middle(self, card):
 
         # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
         mid = ceil(self.size / 2) - 1
-        if self.free_space.lower() in card["squares"][mid][mid].lower():
-            print("free space found in middle of card, updating config")
-            update_config_one_attr("free_space_in_middle", 1)
-        else:
-            print("WARNING: free space not found in middle of card, updating config")
-            update_config_one_attr("free_space_in_middle", 0)
+        free_space_in_mid = self.free_space.lower() in card["squares"][mid][mid].lower()
+        update_config_one_attr("free_space_in_middle", free_space_in_mid)
+        print("free space in middle updated to", free_space_in_mid)
 
 
 def generate_multiple_cards(self, num) -> None:
@@ -343,14 +405,21 @@ def generate_card(url) -> str:
     """
     generates a card and returns its url in the good /play/ format
     """
-
-    response = requests.post(url)
-    pattern = r'<meta property="og:url" content="([^"]+)"'
-    matches = re.findall(pattern, response.text)
-    if matches:
-        return matches[0]
-    else:
-        print("Error getting Session key")
+    try:
+        response = requests.post(url)
+        response.raise_for_status()  # Check if the request was successful
+        pattern = r'<meta property="og:url" content="([^"]+)"'
+        matches = re.findall(pattern, response.text)
+        if matches:
+            return matches[0]
+        else:
+            print("Error getting Session key, retring....")
+            generate_card(url)
+            return
+    except:
+        print(f"Temporary Unavailability for {url}. Retrying...")
+        generate_card(url)
+        return
 
 
 def generate_and_return_details(self, cnt=1) -> dict:

@@ -8,3 +8,5 @@ SA DAI CLEAR LA TOATE CARDURILE INAINTE SA TRIMITI BINGOU
 NOTA IMPORtANTA::: CHESTIA de deasupra cum ca si cum sa dau wipe la ele inainte sa le trimit, ceea ce am uitat sa fac in vteza aia inainte  sa trimit la el, n-a trebuit ca gen doar lui ii apar alea care sunt active, si chestia asta cand o opresti doar nu mai sta pe niciunu si aia e, plus ca chiar mai aveam altele "winnere" care defapt nu erau, in celalte taburi si nu ii apareau deloc alea deci nu era bai nu se prinde nici drq
 
 Contribute to playsound if it even has a public github sometime to make it macos python 10+ compatibble instead of halting
+
+PROBLEM WHEN SETTING SIZE AUTOMATIC

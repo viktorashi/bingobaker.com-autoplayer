@@ -65,7 +65,7 @@ for the operation and options
 ### <font size=5> Positional arguments</font> reffer to the first thing you type after ```python autobingo.py```, meaning the function you want to execute, generating, checking the bingos, marking the spots (which includes checking the bingo's if any spots containing the keywords have been found), and clearing the cards in case jack got a bigo already :'( 
     
 - generate : generates {--count} bingo cards from the specified {--url}, writes their links to {--cards [default cards.txt]} (middle free space is always checked)
-- check :checks bingos for each card, will be less used since it automatically checks the bingo eitherway for each card as it searches
+- check :checks bingos for each card, will be less used since it automatically checks the bingo eitherway for each card as it searches (you can use the Databases supplied in the repo to check for bingos)
 - editconfig : is the default behaviour if nothing specified, it does nothing but update the ***bingoconfig.json***
 
 ### <font size=5> --accelleration <sub> [default: 7 , shorthand -acc]</sub> </font>: The number of threads to use for speeding it up, careful: too many and it's won't really work that well, I suggest around 10-15 the max, it's plenty fast eitherway

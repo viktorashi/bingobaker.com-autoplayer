@@ -15,4 +15,4 @@ DONE✅:  writing to output aint work : STILL
 
 when making it a front-end : make a calculation to see how much time it would take, on avg to check that bingo
 
-Not Checking when found output
+Not Checking when found output (try to make each thread conect via the websocket)

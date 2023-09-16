@@ -10,3 +10,9 @@ NOTA IMPORtANTA::: CHESTIA de deasupra cum ca si cum sa dau wipe la ele inainte 
 Contribute to playsound if it even has a public github sometime to make it macos python 10+ compatibble instead of halting
 
 PROBLEM WHEN SETTING SIZE AUTOMATIC
+
+DONE✅:  writing to output aint work : STILL
+
+when making it a front-end : make a calculation to see how much time it would take, on avg to check that bingo
+
+Not Checking when found output

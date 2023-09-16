@@ -66,7 +66,17 @@ parser.add_argument(
     "--gamemode",
     help="The gamemode to play in. [default: normal] ",
     type=str,
-    choices=["normal", "blackout", "peen", "3in6", "loser", "4corners", "X", "x"],
+    choices=[
+        "normal",
+        "blackout",
+        "peen",
+        "3in6",
+        "loser",
+        "4corners",
+        "X",
+        "x",
+        "plus",
+    ],
     dest="gamemode",
 )
 
@@ -151,8 +161,7 @@ if "url" in options:
 update_config(options)
 
 if args["mode"] == "editconfig":
-    print("bingoconfig.json updated with the following options:")
-    print(options)
+    print("bingoconfig.json updated with the previous options↑↑↑")
     exit()
 
 

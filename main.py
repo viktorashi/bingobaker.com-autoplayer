@@ -97,11 +97,4 @@ class autobingo:
 
         self.input_phrases = read_from_input(self)
 
-        cards: [str] = read_cards_file(self)
-        if self.reverse:
-            cards.reverse()
-        if self.start > 0:
-            cards = cards[self.start :]
-        self.cards = cards
-
         check_bingos_and_write_to_output(self)

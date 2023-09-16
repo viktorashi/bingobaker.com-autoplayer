@@ -84,7 +84,7 @@ options:
  - loser : shape of an L on her forehead (first collumn, last row)
  - 4corners : 4 corners of the card
 - X (or x): X shape
-
+- plus : + shape
 
 ### <font size=5> --reverse <sub>[Bool, default: False, shorthand -r] </sub> </font>: Wether  to do all operations on cards in reverse or normal order, usage: 
 ```bash

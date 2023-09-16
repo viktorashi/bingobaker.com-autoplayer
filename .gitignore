@@ -1,6 +1,6 @@
 #project specific
 markings.txt
-test.py
+test.*
 bruh.py
 bingoconfig.json
 pyvenv.cfg
@@ -164,3 +164,4 @@ cython_debug/
 #.idea/
 output.json
 
+64c998520e68afc5-generated.txt

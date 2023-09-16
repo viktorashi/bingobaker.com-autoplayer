@@ -66,7 +66,7 @@ def get_squares_completion(self, card: dict) -> [[bool]]:
     for i in range(self.size):
         for j in range(self.size):
             for input_phrase in self.input_phrases:
-                if input_phrase.lower() in card["squares"][i][j].lower():
+                if input_phrase.lower().strip() in card["squares"][i][j].lower():
                     squares_completion[i][j] = 1
                     break
 
@@ -113,8 +113,7 @@ def check_peen(size, squares: [[bool]]) -> bool:
             sum += 1
         if squares[size - 1][i] == 1:
             sum += 1
-    if sum == 2 * size - 1:
-        return True
+    return sum == 2 * size - 1
 
 
 def check_3_in_6(size, squares: [[bool]]) -> bool:
@@ -143,9 +142,21 @@ def check_loser(size, squares: [[bool]]) -> bool:
             cnt += 1
         if squares[size - 1][i]:
             cnt += 1
-    if cnt == 2 * size - 1:
-        return True
-    return False
+    return cnt == 2 * size - 1
+
+
+def check_plus(size, squares: [[bool]]) -> bool:
+    """
+    shape of a +
+    """
+    # from math import ceil
+    cnt: int = 0
+    for i in range(size):
+        if squares[i][size // 2]:
+            cnt += 1
+        if squares[size // 2][i]:
+            cnt += 1
+    return cnt == (2 * size)
 
 
 def check_4_corners(size, squares: [[bool]]) -> bool:
@@ -153,14 +164,12 @@ def check_4_corners(size, squares: [[bool]]) -> bool:
     4 corners
     """
 
-    if (
+    return (
         squares[0][0]
         and squares[0][size - 1]
         and squares[size - 1][0]
         and squares[size - 1][size - 1]
-    ):
-        return True
-    return False
+    )
 
 
 def check_x(size, squares: [[bool]]) -> bool:
@@ -174,52 +183,74 @@ def check_x(size, squares: [[bool]]) -> bool:
             cnt += 1
         if squares[size - 1 - i][i]:
             cnt += 1
-    if cnt == 2 * size - 1:
-        return True
-    return False
+    return cnt == 2 * size - 1
 
 
 def check_bingos_and_write_to_output(self) -> None:
     from typing import Callable
 
     check_bingo: Callable[[any], bool]
-
+    # always exclude the freespot
+    min_required: int
     match self.gamemode.lower():
         case "normal":
             check_bingo = check_bingo_row_collumn_diagonal
+            min_required = self.size - 1
         case "blackout":
             check_bingo = check_blackout
+            min_required = self.size**2 - 1
         case "peen":
             check_bingo = check_peen
+            min_required = self.size * 2 - 2
         case "3in6":
             check_bingo = check_3_in_6
+            min_required = 9
         case "loser":
             check_bingo = check_loser
+            min_required = self.size * 2 - 2
         case "4corners":
             check_bingo = check_4_corners
+            min_required = 4
         case "x":
             check_bingo = check_x
-
+            min_required = self.size * 2 - 2
+        case "plus":
+            check_bingo = check_plus
+            min_required = self.size * 2 - 2
     # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
-    from math import ceil
 
-    winning_cards: [dict] = []
+    if len(self.input_phrases) < min_required:
+        raise Exception(
+            f"Minnimum number of {min_required} words for {self.gamemode} bingo gamemode of size {self.size} by {self.size} not reached!!!!, only got {len(self.input_phrases)}"
+        )
 
-    from threading import Thread
+    cards: [str] = read_cards_file(self)
+    if self.reverse:
+        cards.reverse()
+    if self.start > 0:
+        cards = cards[self.start :]
+
+    self.cards = cards
+    print(f"Checking through {len(cards)} cards....")
 
     # split the cards into chunnks of self.num_of_threads and check them in parallel, joining them later, run the check_part_of_cards function on each chunk
+
     leng = len(self.cards)
     cards_chunks = [
-        self.cards[i : i + int(leng / self.num_of_threads)]
-        for i in range(0, leng, int(leng / self.num_of_threads))
+        self.cards[i : i + leng // self.num_of_threads]
+        for i in range(0, leng, leng // self.num_of_threads)
     ]
+    import threading
 
+    winning_cards: [dict] = []
     threads = []
+    global lock
+    lock = threading.Lock()
     for chunk in cards_chunks:
-        t = Thread(
+        t = threading.Thread(
             target=check_part_of_cards, args=(self, chunk, check_bingo, winning_cards)
         )
-        t.daemon = True
+        # t.daemon = True
         threads.append(t)
 
     for thread in threads:
@@ -229,33 +260,44 @@ def check_bingos_and_write_to_output(self) -> None:
         thread.join()
 
     if len(winning_cards) > 0:
-        mark_winning_cards(self, winning_cards)
-        final_wins = winning_cards
         previous_wins = read_from_output(self)
-        if len(previous_wins) > 0:
+        mark_winning_cards(self, winning_cards)
+        new_wins = []
+        if not previous_wins == []:
             previous_urls = [card["url"] for card in previous_wins]
             new_wins = [
                 card for card in winning_cards if card["url"] not in previous_urls
             ]
             new_wins.extend(previous_wins)
-            final_wins = new_wins
-        write_to_output(self, final_wins)
+            write_to_output(self, new_wins)
+        else:
+            write_to_output(self, winning_cards)
+    else:
+        print("Ain't found none sowyy 😭")
 
 
-def check_part_of_cards(self, cards: [dict], check_bingo, winning_cards) -> [dict]:
+def check_part_of_cards(
+    self, cards: [dict], check_bingo_function, winning_cards
+) -> [dict]:
     for card in cards:
         # the following will add new attribute to card dict
-        if check_bingo(self.size, get_squares_completion(self, card)):
-            # for better conciseness and readability
-            print("CONGRATS YOOO YOU GOT A BINGOO, check the output file for details")
-            # last 6 charracters of the link
-            card["key"] = f'!bingowin #{ card["url"][-6:]}'
+        if check_bingo_function(self.size, get_squares_completion(self, card)):
+            # for better performance when multithreading
+            with lock:
+                print(
+                    "CONGRATS YOOO YOU GOT A BINGOO, check the output file for details"
+                )
+                # last 6 charracters of the link
+                card["key"] = f'!bingowin #{ card["url"][-6:]}'
 
-            print(card["url"])
-            print(card["key"])
-            for row in card["completion"]:
-                print(row)
+                print(card["url"])
+                print(card["key"])
+                for row in card["completion"]:
+                    print(row)
+            #try to make this work when multithreading
+            # mark_bingo(self, card)
             del card["squares"]
+
             winning_cards.append(card)
             # currently only plays sound and works for macos but imma try to change it si maybe i also contribute to playsound library on github with python 10+ support
             # playsound()
@@ -269,6 +311,7 @@ def mark_winning_cards(self, winning_cards: [dict]) -> None:
 def mark_bingo(self, card: dict) -> None:
     """
     make self.size no. of threads and mark each square, use the bingo_id from self.bingo_id
+    edit: no need for multithreading inside this function, but the one wrapping this
     """
     pass
     session = card["url"].split("/")[-1]
@@ -281,16 +324,15 @@ def mark_bingo(self, card: dict) -> None:
     mark(session, bingo_id, indexes)
 
 
-import asyncio, websockets
-from string import Template
-
-
 def mark(session: str, bingo_id: str, indexes: [int]):
     """
     session is the code for the current card
     bingoid is the code for the generator link
     both of these reffer to the charracters after the /play/ or # in the url
     """
+
+    import asyncio, websockets
+    from string import Template
 
     async def send_message():
         async with websockets.connect(
@@ -377,7 +419,7 @@ def update_config_one_attr(attr: str, value: any) -> None:
 def update_card_size(self, card) -> None:
     if not self.gamemode == "3in6":
         # automatically set the size of the card
-        self.size = len(card["squares"][0])
+        self.size = len(card["squares"])
         update_config_one_attr("size", self.size)
         print("size of card updated to", self.size)
 
@@ -427,7 +469,8 @@ def generate_and_return_details(self, cnt=1) -> dict:
     generates card, and looks into it to see details
     """
     url = generate_card(self.url)
-    print(url)
+    # less cpu intensive to not log it
+    # print(url)
     card_details = get_card_details(self, url, cnt)
     note_card(self, card_details)
     return card_details

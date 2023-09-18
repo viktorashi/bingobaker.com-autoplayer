@@ -2,6 +2,7 @@ import requests, re
 
 
 def get_text_squares(self, squares) -> [[str]]:
+    #initialize 2d array of empty strings
     phrases: [[str]] = [["" for _ in range(self.size)] for _ in range(self.size)]
     for square in squares:
         phrases[square["row"]][square["col"]] = square["label"]
@@ -29,18 +30,18 @@ def get_card_details(self, url, cnt) -> dict:
     if cnt == 0:
         get_and_set_bingo_id(html_code)
     soup = BeautifulSoup(html_code, "html.parser")
-
+    
     lines = []
-    for i in range(self.size):
-        for j in range(self.size):
-            rect = soup.find("rect", {"data-row": str(i), "data-col": str(j)})
-            if rect:
-                # delete first 2 chars
-                rect["aria-label"] = rect["aria-label"][2:]
-                # delete newlines and replace with spaces
-                rect["aria-label"] = rect["aria-label"].replace("\n", " ")
-                line_data = {"row": i, "col": j, "label": rect["aria-label"]}
-                lines.append(line_data)
+    #\d stand for digit, any number of them
+    rect = soup.findAll("rect", {"data-row":re.compile( r"\d*"), "data-col": re.compile( r"\d*")})
+    if rect:
+        for elem in rect:
+            # delete first 2 chars
+            elem["aria-label"] = elem["aria-label"][2:]
+            # delete newlines and replace with spaces
+            elem["aria-label"] = elem["aria-label"].replace("\n", " ")
+            line_data = {"row": int( elem["data-row"]), "col":int( elem["data-col"]), "label": elem["aria-label"]}
+            lines.append(line_data)
 
     return {"url": url, "squares": get_text_squares(self, lines)}
 
@@ -223,8 +224,9 @@ def check_bingos_and_write_to_output(self) -> None:
         raise Exception(
             f"Minnimum number of {min_required} words for {self.gamemode} bingo gamemode of size {self.size} by {self.size} not reached!!!!, only got {len(self.input_phrases)}"
         )
-
+    
     cards: [str] = read_cards_file(self)
+
     if self.reverse:
         cards.reverse()
     if self.start > 0:
@@ -365,10 +367,17 @@ def update_config(options: dict):
 def read_cards_file(self) -> [dict]:
     try:
         with open(self.cards_path, "r") as f:
-            return [json.loads(line) for line in f.readlines()]
-            # check fi file is empty
+            lines = f.readlines()
+            json_lines =[ ]
+            for line in lines:
+                try:
+                    line =json.loads(line)
+                except:
+                    continue
+                json_lines.append(line)
+            return json_lines
     except:
-        raise Exception("nah, you aint got no cards")
+        raise Exception("nah, you aint got no cards/ the file")
 
 
 def note_card(self, card: dict) -> None:
@@ -393,7 +402,7 @@ def read_from_input(self) -> [str]:
     with open(self.input_path) as f:
         input_phrases = f.read().splitlines()
         if input_phrases == []:
-            raise ValueError("input file is empty")
+            raise ValueError(f"input file {self.input_path} is empty")
         return input_phrases
 
 

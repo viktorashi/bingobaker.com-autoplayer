@@ -160,15 +160,14 @@ if "url" in options:
     options["url"] = format_link(options["url"])
 
 update_config(options)
-print(options)
-if args["mode"] == "editconfig":
-    print("bingoconfig.json updated with the previous options↑↑↑")
-    exit()
-
 
 print("Options:")
 for option in options:
     print(f"{option} : {options[option]}")
+
+if args["mode"] == "editconfig":
+    print("bingoconfig.json updated with the previous options↑↑↑")
+    exit()
 
 
 not_for_class = ["count"]

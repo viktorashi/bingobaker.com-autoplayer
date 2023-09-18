@@ -127,7 +127,7 @@ file_config: dict
 
 
 file_config = read_from_config()
-print(file_config)
+
 
 
 # if not mentioned in the command line arguments, read from bingoconfig.json and it if it is'nt there set the defaults
@@ -158,8 +158,9 @@ for option in options_for_class_not_user:
                 options["size"] = 5
 if "url" in options:
     options["url"] = format_link(options["url"])
-update_config(options)
 
+update_config(options)
+print(options)
 if args["mode"] == "editconfig":
     print("bingoconfig.json updated with the previous options↑↑↑")
     exit()

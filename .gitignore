@@ -1,6 +1,6 @@
 #project specific
 
-test.*
+test/
 bruh.py
 bingoconfig.json
 pyvenv.cfg

@@ -3,7 +3,7 @@ import requests, re
 
 def get_text_squares(self, squares) -> [[str]]:
     #initialize 2d array of empty strings
-    phrases: [[str]] = [["" for _ in range(self.size)] for _ in range(self.size)]
+    phrases: [[str]] = [["" for _ in range(6)] for _ in range(6)]
     for square in squares:
         phrases[square["row"]][square["col"]] = square["label"]
     return phrases
@@ -67,7 +67,7 @@ def get_squares_completion(self, card: dict) -> [[bool]]:
     for i in range(self.size):
         for j in range(self.size):
             for input_phrase in self.input_phrases:
-                if input_phrase.lower().strip() in card["squares"][i][j].lower():
+                if input_phrase in card["squares"][i][j].lower():
                     squares_completion[i][j] = 1
                     break
 
@@ -164,7 +164,6 @@ def check_4_corners(size, squares: [[bool]]) -> bool:
     """
     4 corners
     """
-
     return (
         squares[0][0]
         and squares[0][size - 1]
@@ -399,11 +398,12 @@ def read_from_config() -> dict:
 
 
 def read_from_input(self) -> [str]:
-    with open(self.input_path) as f:
-        input_phrases = f.read().splitlines()
-        if input_phrases == []:
+      with open(self.input_path) as f_in:
+        lines = (line.rstrip() for line in f_in) # All lines including the blank ones
+        lines = list(line for line in lines if line) # Non-blank lines
+        if lines == []:
             raise ValueError(f"input file {self.input_path} is empty")
-        return input_phrases
+        return lines
 
 
 def write_to_output(self, cards: [dict]) -> None:

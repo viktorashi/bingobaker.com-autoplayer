@@ -17,6 +17,4 @@ when making it a front-end : make a calculation to see how much time it would ta
 
 Not Checking when found output (try to make each thread conect via the websocket)
 
-some other shit idk
-
-more idk
+-Aparently when he changes from 5x5 to 6x6 the link stays the same... so that's confusing, and when you go back to a previously generated card it just keeps everything that was before checked and the size gets increased like hmmm idfk how we would be able to save that, brian stuoopid

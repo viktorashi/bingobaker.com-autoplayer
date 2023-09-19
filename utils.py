@@ -3,7 +3,9 @@ import requests, re
 
 def get_text_squares(self, squares) -> [[str]]:
     #initialize 2d array of empty strings
-    phrases: [[str]] = [["" for _ in range(self.size)] for _ in range(self.size)]
+    phrases = {}
+    for square in squares:
+        phrases[square["row"]]= {}
     for square in squares:
         phrases[square["row"]][square["col"]] = square["label"]
     return phrases
@@ -164,7 +166,6 @@ def check_4_corners(size, squares: [[bool]]) -> bool:
     """
     4 corners
     """
-
     return (
         squares[0][0]
         and squares[0][size - 1]
@@ -399,8 +400,9 @@ def read_from_config() -> dict:
 
 
 def read_from_input(self) -> [str]:
-    with open(self.input_path) as f:
-        input_phrases = f.read().splitlines()
+    with open(self.input_path) as f_in:
+        lines = (line.rstrip() for line in f_in) # All lines including the blank ones
+        input_phrases = (line for line in lines if line) # Non-blank lines
         if input_phrases == []:
             raise ValueError(f"input file {self.input_path} is empty")
         return input_phrases

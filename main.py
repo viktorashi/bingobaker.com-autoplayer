@@ -1,10 +1,7 @@
 from threading import Thread
 from utils import (
     check_bingos_and_write_to_output,
-    read_cards_file,
-    update_if_free_space_in_middle,
     generate_and_return_details,
-    update_card_size,
     read_from_input,
     generate_multiple_cards,
     update_config_one_attr,
@@ -71,8 +68,6 @@ class autobingo:
             raise ValueError("generate url not provided")
 
         card = generate_and_return_details(self, 0)
-        update_if_free_space_in_middle(self, card)
-        update_card_size(self, card)
 
         threads = []
         for _ in range(self.num_of_threads):

@@ -1,9 +1,10 @@
 import requests, re
+from time import sleep
 
 
 def get_text_squares(self, squares) -> [[str]]:
-    #initialize 2d array of empty strings
-    phrases: [[str]] = [["" for _ in range(6)] for _ in range(6)]
+    # initialize 2d array of empty strings
+    phrases: [[str]] = [["" for _ in range(self.size)] for _ in range(self.size)]
     for square in squares:
         phrases[square["row"]][square["col"]] = square["label"]
     return phrases
@@ -27,23 +28,32 @@ def get_card_details(self, url, cnt) -> dict:
 
     response = requests.get(url)
     html_code = response.text
-    if cnt == 0:
-        get_and_set_bingo_id(html_code)
     soup = BeautifulSoup(html_code, "html.parser")
-    
     lines = []
-    #\d stand for digit, any number of them
-    rect = soup.findAll("rect", {"data-row":re.compile( r"\d*"), "data-col": re.compile( r"\d*")})
+    # \d stand for digit, any number of them
+    rect = soup.findAll(
+        "rect", {"data-row": re.compile(r"\d*"), "data-col": re.compile(r"\d*")}
+    )
     if rect:
         for elem in rect:
             # delete first 2 chars
             elem["aria-label"] = elem["aria-label"][2:]
             # delete newlines and replace with spaces
             elem["aria-label"] = elem["aria-label"].replace("\n", " ")
-            line_data = {"row": int( elem["data-row"]), "col":int( elem["data-col"]), "label": elem["aria-label"]}
+            line_data = {
+                "row": int(elem["data-row"]),
+                "col": int(elem["data-col"]),
+                "label": elem["aria-label"],
+            }
             lines.append(line_data)
 
-    return {"url": url, "squares": get_text_squares(self, lines)}
+    if cnt == 0:
+        update_card_size(self, rect)
+        get_and_set_bingo_id(html_code)
+    squares = get_text_squares(self, lines)
+    if cnt == 0:
+        update_if_free_space_in_middle(self, squares)
+    return {"url": url, "squares": squares}
 
 
 def get_squares_completion(self, card: dict) -> [[bool]]:
@@ -223,7 +233,7 @@ def check_bingos_and_write_to_output(self) -> None:
         raise Exception(
             f"Minnimum number of {min_required} words for {self.gamemode} bingo gamemode of size {self.size} by {self.size} not reached!!!!, only got {len(self.input_phrases)}"
         )
-    
+
     cards: [str] = read_cards_file(self)
 
     if self.reverse:
@@ -295,7 +305,7 @@ def check_part_of_cards(
                 print(card["key"])
                 for row in card["completion"]:
                     print(row)
-            #try to make this work when multithreading
+            # try to make this work when multithreading
             # mark_bingo(self, card)
             del card["squares"]
 
@@ -355,7 +365,7 @@ import json
 
 
 def format_link(url):
-    return url.replace("#", "play/")
+    return url.replace("#", "/play/")
 
 
 def update_config(options: dict):
@@ -367,10 +377,10 @@ def read_cards_file(self) -> [dict]:
     try:
         with open(self.cards_path, "r") as f:
             lines = f.readlines()
-            json_lines =[ ]
+            json_lines = []
             for line in lines:
                 try:
-                    line =json.loads(line)
+                    line = json.loads(line)
                 except:
                     continue
                 json_lines.append(line)
@@ -398,9 +408,9 @@ def read_from_config() -> dict:
 
 
 def read_from_input(self) -> [str]:
-      with open(self.input_path) as f_in:
-        lines = (line.rstrip() for line in f_in) # All lines including the blank ones
-        lines = list(line for line in lines if line) # Non-blank lines
+    with open(self.input_path) as f_in:
+        lines = (line.rstrip() for line in f_in)  # All lines including the blank ones
+        lines = list(line for line in lines if line)  # Non-blank lines
         if lines == []:
             raise ValueError(f"input file {self.input_path} is empty")
         return lines
@@ -425,23 +435,28 @@ def update_config_one_attr(attr: str, value: any) -> None:
     update_config(options)
 
 
-def update_card_size(self, card) -> None:
+def update_card_size(self, regexMatch) -> None:
+    from math import sqrt
+
     if not self.gamemode == "3in6":
         # automatically set the size of the card
-        self.size = len(card["squares"])
+        self.size = int(sqrt(len(regexMatch)))
         update_config_one_attr("size", self.size)
         print("size of card updated to", self.size)
 
 
-def update_if_free_space_in_middle(self, card):
+def update_if_free_space_in_middle(self, squares):
     if self.size % 2 == 1:
         from math import ceil
 
         # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
         mid = ceil(self.size / 2) - 1
-        free_space_in_mid = self.free_space.lower() in card["squares"][mid][mid].lower()
+        free_space_in_mid = self.free_space.lower() in squares[mid][mid].lower()
         update_config_one_attr("free_space_in_middle", free_space_in_mid)
         print("free space in middle updated to", free_space_in_mid)
+    else:
+        update_config_one_attr("free_space_in_middle", False)
+        print("free space in middle updated to", False)
 
 
 def generate_multiple_cards(self, num) -> None:
@@ -468,7 +483,9 @@ def generate_card(url) -> str:
             generate_card(url)
             return
     except:
-        print(f"Temporary Unavailability for {url}. Retrying...")
+        print(f"Temporary Unavailability for {url}  Retrying...")
+
+        sleep(1)
         generate_card(url)
         return
 

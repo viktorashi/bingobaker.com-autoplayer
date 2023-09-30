@@ -67,7 +67,7 @@ class autobingo:
         if self.url == "":
             raise ValueError("generate url not provided")
 
-        card = generate_and_return_details(self, 0)
+        generate_and_return_details(self, 0)
 
         threads = []
         for _ in range(self.num_of_threads):
@@ -91,5 +91,7 @@ class autobingo:
         # innit the reading and changing of the files
 
         self.input_phrases = read_from_input(self)
+        if self.size % 2 == 0 or not self.free_space_in_middle:
+            self.input_phrases.append(self.free_space)
 
         check_bingos_and_write_to_output(self)

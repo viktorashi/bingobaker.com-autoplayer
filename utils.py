@@ -1,5 +1,6 @@
 import requests, re
 from time import sleep
+from math import ceil
 
 
 def get_text_squares(self, squares) -> [[str]]:
@@ -65,15 +66,13 @@ def get_squares_completion(self, card: dict) -> [[bool]]:
         [0 for _ in range(self.size)] for _ in range(self.size)
     ]
     # have to search for the free space, it won't neccesarilly be in the middle
-    if self.size % 2 == 0 or not self.free_space_in_middle:
-        self.input_phrases.append(self.free_space)
-    else:
-        # or, in if it is odd or in the middle, just check that middle
-        from math import ceil
 
-        mid = ceil(self.size / 2) - 1
-        # i forgor its indexed from 0 💀
-        squares_completion[mid][mid] = 1
+    # or, in if it is odd or in the middle, just check that middle
+
+    mid = ceil(self.size / 2) - 1
+    # i forgor its indexed from 0 💀
+    squares_completion[mid][mid] = int(self.free_space_in_middle)
+
     for i in range(self.size):
         for j in range(self.size):
             for input_phrase in self.input_phrases:

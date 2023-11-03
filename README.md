@@ -1,5 +1,5 @@
 # SSSniperWolf-BBBingo-autoplay
- A script to play SSSniperWolf BBBingo by jacksfilms automatically. Esentially opens a shitton of cards you want to, to increase your chances and then you can check if the input you give to it results in a bingo for any of those cards.
+ A script to play SSSniperWolf BBBingo by jacksfilms automatically. Esentially opens a shitton of cards to increase your chances of winning and then you can check if the input you give to it results in a bingo for any of those cards.
 
 <h1> <span style="color:#F47174">
  Easiest

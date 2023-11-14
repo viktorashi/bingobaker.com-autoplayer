@@ -76,6 +76,7 @@ parser.add_argument(
         "X",
         "x",
         "plus",
+        "j",
     ],
     dest="gamemode",
 )
@@ -127,7 +128,6 @@ file_config: dict
 
 
 file_config = read_from_config()
-
 
 
 # if not mentioned in the command line arguments, read from bingoconfig.json and it if it is'nt there set the defaults

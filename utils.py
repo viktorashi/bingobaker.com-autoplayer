@@ -81,6 +81,8 @@ def get_squares_completion(self, card: dict) -> [[bool]]:
                     break
 
     card["completion"] = squares_completion
+    tmp = {"url": card["url"], "squares_completion": card["completion"]}
+    write_to_output_console("test.json", tmp)
     return squares_completion
 
 
@@ -195,6 +197,26 @@ def check_x(size, squares: [[bool]]) -> bool:
     return cnt == 2 * size - 1
 
 
+def check_J_shape(size, squares: [[bool]]) -> bool:
+    """
+    shape of a J
+    """
+    for i in range(1, size):
+        # if there is a spot in the first row for said collumn
+        if squares[0][i]:
+            # check if rest of cullumn is filled
+            if sum([row[i] for row in squares]) == size:
+                if (
+                    squares[size - 1][i - 1]
+                    and squares[size - 1][i - 2]
+                    and squares[size - 2][i - 2]
+                ):
+                    return True
+        else:
+            continue
+    return False
+
+
 def check_bingos_and_write_to_output(self) -> None:
     from typing import Callable
 
@@ -226,6 +248,9 @@ def check_bingos_and_write_to_output(self) -> None:
         case "plus":
             check_bingo = check_plus
             min_required = self.size * 2 - 2
+        case "j":
+            check_bingo = check_J_shape
+            min_required = self.size + 2
     # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
 
     if len(self.input_phrases) < min_required:
@@ -395,6 +420,12 @@ def note_card(self, card: dict) -> None:
     card["url"] = format_link(card["url"])
     with open(self.cards_path, "a+") as f:
         f.write(json.dumps(card))
+        f.write("\n")
+
+
+def write_to_output_console(file, text) -> None:
+    with open(file, "a+") as f:
+        f.write(json.dumps(text) + ",")
         f.write("\n")
 
 

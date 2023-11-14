@@ -10,6 +10,7 @@ the user submit the min ammount of
 words
 PROBLEM WHEN SETTING SIZE AUTOMATIC
 
+Make special function for when somebody got a bingo and the cards are scambled to look for WHILE the generate is running. Just halt, delete the contents of [cards file] then continue generating. Delete si input fileu
 
 
 El vede care carduri mai am da practic daca le vede pe celalalte goale nu i baiu, deci tre sa dau wipe la toate celallte in afara de ala care e bun inainte sa-i trimit lui

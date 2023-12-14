@@ -125,7 +125,7 @@ def check_peen(size, squares: [[bool]]) -> bool:
             sum += 1
         if squares[size - 1][i] == 1:
             sum += 1
-    return sum == 2 * size - 1
+    return sum >= 2 * size 
 
 
 def check_3_in_6(size, squares: [[bool]]) -> bool:

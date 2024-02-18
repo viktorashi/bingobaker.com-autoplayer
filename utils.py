@@ -220,41 +220,26 @@ def check_bingos_and_write_to_output(self) -> None:
 
     check_bingo: Callable[[any], bool]
     # always exclude the freespot
-    min_required: int
     match self.gamemode.lower():
         case "normal":
             check_bingo = check_bingo_row_collumn_diagonal
-            min_required = self.size - 1
         case "blackout":
             check_bingo = check_blackout
-            min_required = self.size**2 - 1
         case "peen":
             check_bingo = check_peen
-            min_required = self.size * 2 - 2
         case "3in6":
             check_bingo = check_3_in_6
-            min_required = 9
         case "loser":
             check_bingo = check_loser
-            min_required = self.size * 2 - 2
         case "4corners":
             check_bingo = check_4_corners
-            min_required = 4
         case "x":
             check_bingo = check_x
-            min_required = self.size * 2 - 2
         case "plus":
             check_bingo = check_plus
-            min_required = self.size * 2 - 2
         case "j":
             check_bingo = check_J_shape
-            min_required = self.size + 2
     # if the first one doesn't have it in the middle, change the settings to not look for it in the middle
-
-    if len(self.input_phrases) < min_required:
-        raise Exception(
-            f"Minnimum number of {min_required} words for {self.gamemode} bingo gamemode of size {self.size} by {self.size} not reached!!!!, only got {len(self.input_phrases)}"
-        )
 
     cards: [str] = read_cards_file(self)
 
@@ -294,19 +279,23 @@ def check_bingos_and_write_to_output(self) -> None:
 
     if len(winning_cards) > 0:
         previous_wins = read_from_output(self)
-        mark_winning_cards(self, winning_cards)
+        
         new_wins = []
         #this puts the most recent wins up top first
         if not previous_wins == []:
             previous_urls = [card["url"] for card in previous_wins]
             new_wins = [
-                card for card in winning_cards if card["url"] not in previous_urls
+                card for card in winning_cards if "https://bingobaker.com/play/" + card["url"] not in previous_urls
             ]
+            #only mark the new ones, without having to connect to the server for all of them that are already checked
+            mark_winning_cards(self, new_wins)
             for card in new_wins:
                 card["url"] = "https://bingobaker.com/play/" + card["url"]
             new_wins.extend(previous_wins)
             write_to_output(self, new_wins)
         else:
+            #if there are no previous wins
+            mark_winning_cards(self, winning_cards)
             for card in winning_cards:
                 card["url"] = "https://bingobaker.com/play/" + card["url"]
             write_to_output(self, winning_cards)

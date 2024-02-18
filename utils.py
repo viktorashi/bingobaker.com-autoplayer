@@ -117,13 +117,13 @@ def check_peen(size, squares: [[bool]]) -> bool:
     shape of peen:
     """
     # check middle collumn and bottom row
+    sum = 0
     for i in range(size):
-        sum = 0
         if squares[i][size // 2] == 1:
             sum += 1
         if squares[size - 1][i] == 1:
             sum += 1
-    return sum >= 2 * size 
+    return sum == 2 * size 
 
 
 def check_3_in_6(size, squares: [[bool]]) -> bool:
@@ -254,28 +254,34 @@ def check_bingos_and_write_to_output(self) -> None:
     # split the cards into chunnks of self.num_of_threads and check them in parallel, joining them later, run the check_part_of_cards function on each chunk
 
     leng = len(self.cards)
-    cards_chunks = [
-        self.cards[i : i + leng // self.num_of_threads]
-        for i in range(0, leng, leng // self.num_of_threads)
-    ]
-    import threading
-
     winning_cards: [dict] = []
-    threads = []
-    global lock
+    global lock 
+    import threading
     lock = threading.Lock()
-    for chunk in cards_chunks:
-        t = threading.Thread(
-            target=check_part_of_cards, args=(self, chunk, check_bingo, winning_cards)
-        )
-        # t.daemon = True
-        threads.append(t)
+    #but only if there are more cards than threads, cuz otherwise don't work
+    if leng >= self.num_of_threads:
+        cards_chunks = [
+            self.cards[i : i + leng // self.num_of_threads]
+            for i in range(0, leng, leng // self.num_of_threads)
+        ]
 
-    for thread in threads:
-        thread.start()
 
-    for thread in threads:
-        thread.join()
+        threads = []
+        
+        for chunk in cards_chunks:
+            t = threading.Thread(
+                target=check_part_of_cards, args=(self, chunk, check_bingo, winning_cards)
+            )
+            # t.daemon = True
+            threads.append(t)
+
+        for thread in threads:
+            thread.start()
+
+        for thread in threads:
+            thread.join()
+    else:
+        check_part_of_cards(self, self.cards, check_bingo, winning_cards)
 
     if len(winning_cards) > 0:
         previous_wins = read_from_output(self)

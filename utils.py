@@ -325,7 +325,7 @@ def check_part_of_cards(
                 # last 6 charracters of the link
                 card["key"] = f'!bingowin #{ card["url"][-6:]}'
 
-                print(card["url"])
+                print("https://bingobaker.com/play/" + card["url"])
                 print(card["key"])
                 for row in card["completion"]:
                     print(row)
@@ -349,7 +349,7 @@ def mark_bingo(self, card: dict) -> None:
     edit: no need for multithreading inside this function, but the one wrapping this
     """
     pass
-    session = card["url"].split("/")[-1]
+    session = card["url"]
     bingo_id = self.bingo_id
     indexes: [int] = []
     for i in range(self.size):
@@ -417,7 +417,7 @@ def note_card(self, card: dict) -> None:
     """
     writes the link to the cards.txt file
     """
-    card["url"] = format_link(card["url"])
+    card["url"] =  format_link(card["url"]).split("/")[-1] #delete "https://bingobaker.com/play/" and keep the last charracters of the link
     with open(self.cards_path, "a+") as f:
         f.write(json.dumps(card))
         f.write("\n")

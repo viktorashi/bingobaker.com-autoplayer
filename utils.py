@@ -302,9 +302,13 @@ def check_bingos_and_write_to_output(self) -> None:
             new_wins = [
                 card for card in winning_cards if card["url"] not in previous_urls
             ]
+            for card in new_wins:
+                card["url"] = "https://bingobaker.com/play/" + card["url"]
             new_wins.extend(previous_wins)
             write_to_output(self, new_wins)
         else:
+            for card in winning_cards:
+                card["url"] = "https://bingobaker.com/play/" + card["url"]
             write_to_output(self, winning_cards)
     else:
         print("Ain't found none sowyy 😭")
@@ -446,8 +450,6 @@ def read_from_input(self) -> [str]:
 
 
 def write_to_output(self, cards: [dict]) -> None:
-    for card in cards:
-        card["url"] = "https://bingobaker.com/play/" + card["url"]
     with open(self.output_path, "w+") as f:
         f.write(json.dumps(cards))
 

@@ -81,8 +81,6 @@ def get_squares_completion(self, card: dict) -> [[bool]]:
                     break
 
     card["completion"] = squares_completion
-    tmp = {"url": card["url"], "squares_completion": card["completion"]}
-    write_to_output_console("test.json", tmp)
     return squares_completion
 
 
@@ -298,6 +296,7 @@ def check_bingos_and_write_to_output(self) -> None:
         previous_wins = read_from_output(self)
         mark_winning_cards(self, winning_cards)
         new_wins = []
+        #this puts the most recent wins up top first
         if not previous_wins == []:
             previous_urls = [card["url"] for card in previous_wins]
             new_wins = [
@@ -447,6 +446,8 @@ def read_from_input(self) -> [str]:
 
 
 def write_to_output(self, cards: [dict]) -> None:
+    for card in cards:
+        card["url"] = "https://bingobaker.com/play/" + card["url"]
     with open(self.output_path, "w+") as f:
         f.write(json.dumps(cards))
 

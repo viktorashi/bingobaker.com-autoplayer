@@ -86,7 +86,8 @@ def get_squares_completion(self, card: dict) -> [[bool]]:
 
 def check_bingo_row_collumn_diagonal(size, squares: [[bool]]) -> bool:
     """
-    regular ass bingo
+    regular ass bingo 
+    any row any collumn
     """
     # check bingo for elements in row, collumn or diagonal
     for i in range(size):

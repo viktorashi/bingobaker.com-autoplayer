@@ -24,6 +24,8 @@ def get_card_details(self, url, cnt) -> dict:
     """
     returns a dictionary of the url of the card and a 2d array of the phrases squares of the card
     also sets the bingo_id of the game
+    doamne ce genial e ala de mi-a fct ala damn free palestine vreau sa vad daca imi merge macar credetnialele pe github sa dau push atata
+
     """
     from bs4 import BeautifulSoup
 
@@ -86,7 +88,8 @@ def get_squares_completion(self, card: dict) -> [[bool]]:
 
 def check_bingo_row_collumn_diagonal(size, squares: [[bool]]) -> bool:
     """
-    regular ass bingo
+    regular ass bingo 
+    any row any collumn
     """
     # check bingo for elements in row, collumn or diagonal
     for i in range(size):

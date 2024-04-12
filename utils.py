@@ -349,7 +349,6 @@ def mark_bingo(self, card: dict) -> None:
     make self.size no. of threads and mark each square, use the bingo_id from self.bingo_id
     edit: no need for multithreading inside this function, but the one wrapping this
     """
-    pass
     session = card["url"]
     bingo_id = self.bingo_id
     indexes: [int] = []

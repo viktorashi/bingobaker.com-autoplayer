@@ -4,6 +4,8 @@ test*
 bruh.py
 bingoconfig.json
 pyvenv.cfg
+#for virtualenvwrapper to know the curr. project folder
+.project 
 *.txt
 !requirements.txt
 !input.txt

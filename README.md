@@ -164,6 +164,8 @@ respectively
 
 idk how well i've tested this but i believe it starts messing up if you do. But delete it all-togather if you have and it doesn't work anymore, it will just generate another one.
 
+Also, if you've checked the same card twice, even if you changed the gamemode, it won't auto-mark the spots again, even if the checked spots are different.
+
 <h1>Usage example</h1>
 
 #### Don't be scared by the extensive docs, it's actually really easy to use

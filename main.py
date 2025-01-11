@@ -89,7 +89,6 @@ class autobingo:
         checks bingo for all cards in the cards.txt file
         """
         # innit the reading and changing of the files
-
         self.input_phrases = read_from_input(self)
         for indx, phrase in enumerate(self.input_phrases):
             self.input_phrases[indx] = phrase.lower()

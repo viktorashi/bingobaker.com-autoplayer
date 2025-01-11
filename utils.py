@@ -25,7 +25,6 @@ def get_card_details(self, url, cnt) -> dict:
     returns a dictionary of the url of the card and a 2d array of the phrases squares of the card
     also sets the bingo_id of the game
     doamne ce genial e ala de mi-a fct ala damn free palestine vreau sa vad daca imi merge macar credetnialele pe github sa dau push atata
-
     """
     from bs4 import BeautifulSoup
 
@@ -440,7 +439,7 @@ def read_from_config() -> dict:
 def read_from_input(self) -> [str]:
     with open(self.input_path) as f_in:
         lines = (line.rstrip() for line in f_in)  # All lines including the blank ones
-        lines = list(line for line in lines if line)  # Non-blank lines
+        lines = list(line for line in lines if line)  # Remove the blanks
         if lines == []:
             raise ValueError(f"input file {self.input_path} is empty")
         return lines

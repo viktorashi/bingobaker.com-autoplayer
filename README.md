@@ -62,7 +62,7 @@ for the operation and options
 
 ## Regarding  all the options : if nothing is specified, the last used value from the bingoconfig.json file will be used, if never specified before, the default values will be used
 
-### <font size=5> Positional arguments</font> reffer to the first thing you type after ```python autobingo.py```, meaning the function you want to execute, generating, checking the bingos, marking the spots (which includes checking the bingo's if any spots containing the keywords have been found), and clearing the cards in case jack got a bigo already :'( 
+### <font size=5> Positional arguments</font> refer to the first thing you type after ```python autobingo.py```, meaning the function you want to execute, generating, checking the bingos, marking the spots (which includes checking the bingo's if any spots containing the keywords have been found), and clearing the cards in case jack got a bigo already :'( 
     
 - generate : generates {--count} bingo cards from the specified {--url}, writes their links to {--cards [default cards.txt]} (middle free space is always checked)
 - check :checks bingos for each card, will be less used since it automatically checks the bingo eitherway for each card as it searches (you can use the Databases supplied in the repo to check for bingos)
@@ -86,7 +86,7 @@ options:
 - X (or x): X shape
 - plus : + shape
 
-### <font size=5> --reverse <sub>[Bool, default: False, shorthand -r] </sub> </font>: Wether  to do all operations on cards in reverse or normal order, usage: 
+### <font size=5> --reverse <sub>[Bool, default: False, shorthand -r] </sub> </font>: Wether  to do all operations on cards in reverse or normal order, usage (kinda deprecated, was used when the app was slow asl): 
 ```bash
 python autobingo.py mark -r
 ```
@@ -96,17 +96,24 @@ python autobingo.py mark --reverse
 ```
 
 
-### <font size=5> --start <sub>[int, default: 0, shorthard -strt] </sub> </font>:  The index of the card to start doing anything from
+### <font size=5> --start <sub>[int, default: 0, shorthard -strt] </sub> </font>:  The index of the card to start doing anything from (kinda deprecated, was used when the app was slow asl)
 
 ### <font size=5> --free-space <sub>[string, default: "no credit", shorthand -fs] </sub> </font>: The name of the freespace spot to check for if the card has an even size (meaning there is no clear midde spot)
 
-### <font size=5> --input <sub> [default: input.txt , shorthand -i]</sub> </font>  is the file in which you have the keywords you want to search for on the bingo cards, each keyword on a new line. They DON'T have to be specified exactly as in the cards, lowercase values will be compared and they can just contain  those strings 
+### <font size=5> --input <sub> [default: input.txt , shorthand -i]</sub> </font>  is the file in which you have the keywords you want to search for on the bingo cards, each keyword on a new line. They DON'T have to match perfectly with the ones in the cards: It's case insesitive and looks if the phrases in each line are a substring of what's written on the cards, for example:
 #### **`inpux.txt`**
 ``` 
 freebooting a freebooted 
 fake laugh
 bro
 ```
+would all match
+``` 
+Freebooting a freebooted video
+Fake Laugh
+"bro"
+```
+respectively
 ### <font size=5> --output <sub>[default: output.json, shorthand -o]</sub></font> : file that outputs the bingos 
 #### **`output.json`**
 ``` 

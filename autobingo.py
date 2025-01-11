@@ -1,18 +1,6 @@
 # the command line tool version of AutoBingo
 import argparse
 
-"""
-`
-idei de cum sa fac comannd lineu 
-
-e pe moduri: 
-    - editconfig [defaultu daca nu e specificat]
-    - generate
-    - check
-    - help 
-    - mark
-    - clear
-"""
 parser = argparse.ArgumentParser(
     description="Auto Bingo playing command line tool. Currently only being used for bingobaker.com",
     prog="autobingo",
@@ -84,7 +72,7 @@ parser.add_argument(
 parser.add_argument(
     "-r",
     "--reverse",
-    help="Reverse the bingo card order when reading from [cards.txt] [default False]",
+    help="(deprecated) Reverse the bingo card order when reading from [cards.txt] [default False]",
     action="store_true",
     dest="reverse",
 )
@@ -92,7 +80,7 @@ parser.add_argument(
 parser.add_argument(
     "-strt",
     "--start",
-    help="The index of the card to start doing anything from",
+    help="(deprecated) The index of the card to start doing anything from",
     type=int,
     dest="start",
 )
@@ -117,20 +105,19 @@ parser.set_defaults(count=-1, mode="editconfig")
 # dict repr of the arguments, will need some cleaning up
 args = vars(parser.parse_args())
 
-options = {}
+# Pentru fiecare argument, daca e default sau None o sa luam din bingoconfig.json valoarea lui, daca nu e acolo
+# atunci lasi asa si nu adaugi nimic in options ca o sa ia optiunea default automat din clasa autobingo.
 
-
-# Pentru fiecare argument, daca e default sau None o sa luam din bingoconfig.json valoarea lui, daca nu e acolo atunci lasi asa si nu adaugi nimic in options ca o sa ia optiunea default automat din clasa autobingo
+# For each argument, if it's default or None we're going to take the value from bingoconfig.json,
+# if it's not there then we leave it as is and don't add it to options because it's going to take the
+# default value from the autobingo class
 
 from utils import update_config, read_from_config, format_link
 
-file_config: dict
+options = {}
+file_config: dict = read_from_config()
 
-
-file_config = read_from_config()
-
-
-# if not mentioned in the command line arguments, read from bingoconfig.json and it if it is'nt there set the defaults
+# if not mentioned in the command line arguments, read from bingoconfig.json and it if it isn't there set the defaults
 for arg in args:
     if (args[arg] == None) or (args[arg] == -1) or (args[arg] == "default"):
         # read from bingoconfig.json
@@ -142,10 +129,9 @@ for arg in args:
                     options["count"] = 100
                 case _:
                     pass
-    elif not arg == "mode":
+    elif not (arg == "mode"):
         options[arg] = args[arg]
 
-# this is not for the simpletons, code will figure it out
 options_for_class_not_user = ["free_space_in_middle", "size", "bingo_id"]
 for option in options_for_class_not_user:
     if option in file_config:
@@ -169,17 +155,14 @@ if args["mode"] == "editconfig":
     print("bingoconfig.json updated with the previous options↑↑↑")
     exit()
 
+from main import autobingo
 
 not_for_class = ["count"]
-# preparing it for the autobingo class
+# it's "options" without the "count" key
 input_options = {}
-
-
 for option in options:
     if not (option in not_for_class):
         input_options[option] = options[option]
-
-from main import autobingo
 
 # kinda like object destructuring in js
 bingo = autobingo(**input_options)
@@ -187,7 +170,7 @@ bingo = autobingo(**input_options)
 match args["mode"]:
     case "generate":
         print(f"Generating {options['count']} cards from {options['url']}")
-        bingo.createCards(options["count"])
+        bingo.create_cards(options["count"])
         print("Cards generated! Check the cards.txt file for the links")
     case "check":
         print("Checking to see if my mans (or gals) got a bingo....")

@@ -59,7 +59,7 @@ class autobingo:
             update_config_one_attr("free_space_in_middle", False)
             print("Updating size to 6 and free space in middle for 3in6 gamemode")
 
-    def createCards(self, num: int) -> None:
+    def create_cards(self, num: int) -> None:
         """
         creates num cards and writes their links to the cards.txt file
         """

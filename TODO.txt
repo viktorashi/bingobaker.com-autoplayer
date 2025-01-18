@@ -22,16 +22,14 @@ NOTA IMPORtANTA::: CHESTIA de deasupra cum ca si cum sa dau wipe la ele inainte 
 
 Contribute to playsound if it even has a public github sometime to make it macos python 10+ compatibble instead of halting
 
-
-
 when making it a front-end : make a calculation to see how much time it would take, on avg to check that bingo
 
 Not Checking when found output (try to make each thread conect via the websocket)
 
 
-BUG : when trying to acces links of the from
+BUG : when trying to acces links of the form
 bingobaker.com/play/650e06a734b74201
 https://bingobaker.com/#650e06a734b74201
- it don't work but when chancing it to
- https://bingobaker.com/play/650e06a734b74201
+ it don't work but when changing it to
+https://bingobaker.com/play/650e06a734b74201
  it's fine, so yeah just make a change for that whenever

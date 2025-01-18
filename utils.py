@@ -388,7 +388,7 @@ import json
 
 
 def format_link(url):
-    return url.replace("#", "/play/")
+    return url.replace("#", "play/")
 
 
 def update_config(options: dict):

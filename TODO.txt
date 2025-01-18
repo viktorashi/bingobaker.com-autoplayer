@@ -28,3 +28,10 @@ when making it a front-end : make a calculation to see how much time it would ta
 
 Not Checking when found output (try to make each thread conect via the websocket)
 
+
+BUG : when trying to acces links of the from
+bingobaker.com/play/650e06a734b74201
+https://bingobaker.com/#650e06a734b74201
+ it don't work but when chancing it to
+ https://bingobaker.com/play/650e06a734b74201
+ it's fine, so yeah just make a change for that whenever

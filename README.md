@@ -17,8 +17,32 @@ copy and paste this block into your terminal
 ```bash
 git clone https://github.com/viktorashi/bingobaker.com-autoplayer && cd bingobaker.com-autoplayer && pip install -r requirements.txt
 ```
-<h3>2. Get usage directions</h3>
+<h3>2. Usage example</h3>
 
+#### Don't be scared by the extensive docs, it's actually really easy to use
+First you would usually want to generate the cards, so 
+##### **`zsh`**
+```bash
+python autobingo.py generate --url https://bingobaker.com/#64c998520e68afc5 -cnt 100
+```
+should do the job, then you would create an **input.txt** right next to this and run
+
+##### **`zsh`**
+```bash
+python autobingo.py check
+```
+This will copy "!bingowin #\<number\>" to your clipboard automatically for each bingo found
+ez, see if it outputed anything about a congratilations, then go to output.json to check it.
+#### This generates 75 bingo cards with the generator link you have provided to it, the bingo's of which will be saved to the ***wins.txt*** file.
+
+##### **`zsh`**
+```bash
+python autobingo.py generate --url https://bingobaker.com/#64c998520e68afc5 --output wins.txt --count 75 
+```
+Given all this data has been saved to ***bingoconfig.json*** this 
+
+
+<h3>3. Get usage directions</h3>
 
 
 ```bash
@@ -59,6 +83,8 @@ options:
 ion care how u use my code lol
 ```
 for the operation and options
+
+
 
 ## Regarding  all the options : if nothing is specified, the last used value from the bingoconfig.json file will be used, if never specified before, the default values will be used
 
@@ -165,29 +191,6 @@ respectively
 idk how well i've tested this but i believe it starts messing up if you do. But delete it all-togather if you have and it doesn't work anymore, it will just generate another one.
 
 Also, if you've checked the same card twice, even if you changed the gamemode, it won't auto-mark the spots again, even if the checked spots are different.
-
-<h1>Usage example</h1>
-
-#### Don't be scared by the extensive docs, it's actually really easy to use
-First you would usually want to generate the cards, so 
-##### **`zsh`**
-```bash
-python autobingo.py generate --url https://bingobaker.com/#64c998520e68afc5 -cnt 100
-```
-should do the job, then you would create an **input.txt** right next to this and run
-
-##### **`zsh`**
-```bash
-python autobingo.py check
-```
-ez, peek into the console once in a while and see if it outputed anything about a congratilations, then go to output.json to check it.
-#### This generates 75 bingo cards with the generator link you have provided to it, the bingo's of which will be saved to the ***wins.txt*** file.
-
-##### **`zsh`**
-```bash
-python autobingo.py generate --url https://bingobaker.com/#64c998520e68afc5 --output wins.txt --count 75 
-```
-Given all this data has been saved to ***bingoconfig.json*** this 
 
 
 <h2>For the coders</h2>

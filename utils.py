@@ -1,7 +1,7 @@
 import requests, re
 from time import sleep
 from math import ceil
-import tkinter as tk
+import pyperclip
 
 
 def get_text_squares(self, squares) -> [[str]]:
@@ -261,9 +261,6 @@ def check_bingos_and_write_to_output(self) -> None:
     global lock
     import threading
     lock = threading.Lock()
-    r = tk()
-    r.withdraw()
-    r.clipboard_clear()
     # but only if there are more cards than threads, cuz otherwise don't work
     if leng >= self.num_of_threads:
         cards_chunks = [
@@ -275,7 +272,7 @@ def check_bingos_and_write_to_output(self) -> None:
 
         for chunk in cards_chunks:
             t = threading.Thread(
-                target=check_part_of_cards, args=(self, chunk, check_bingo, winning_cards, r)
+                target=check_part_of_cards, args=(self, chunk, check_bingo, winning_cards)
             )
             # t.daemon = True
             threads.append(t)
@@ -286,7 +283,7 @@ def check_bingos_and_write_to_output(self) -> None:
         for thread in threads:
             thread.join()
     else:
-        check_part_of_cards(self, self.cards, check_bingo, winning_cards, r)
+        check_part_of_cards(self, self.cards, check_bingo, winning_cards)
 
     if len(winning_cards) > 0:
         previous_wins = read_from_output(self)
@@ -315,7 +312,7 @@ def check_bingos_and_write_to_output(self) -> None:
 
 
 def check_part_of_cards(
-        self, cards: [dict], check_bingo_function, winning_cards, tkinter_clipboard
+        self, cards: [dict], check_bingo_function, winning_cards
 ) -> [dict]:
     for card in cards:
         # the following will add new attribute to card dict
@@ -328,8 +325,7 @@ def check_part_of_cards(
                 # last 6 charracters of the link
                 card["key"] = f'!bingowin #{card["url"][-6:]}'
 
-                tkinter_clipboard.clipboard_append(card["key"])
-                tkinter_clipboard.update()  # this keeps it after it closes apparently
+                pyperclip.copy(card["key"])
 
                 print("https://bingobaker.com/play/" + card["url"])
                 print(card["key"])

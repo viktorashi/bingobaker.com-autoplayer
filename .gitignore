@@ -12,6 +12,9 @@ pyvenv.cfg
 output.json
 .DS_Store
 
+#alea de la vim
+*.swp
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

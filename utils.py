@@ -1,6 +1,7 @@
 import requests, re
 from time import sleep
 from math import ceil
+import tkinter as tk
 
 
 def get_text_squares(self, squares) -> [[str]]:
@@ -125,7 +126,7 @@ def check_peen(size, squares: [[bool]]) -> bool:
             sum += 1
         if squares[size - 1][i] == 1:
             sum += 1
-    return sum == 2 * size 
+    return sum == 2 * size
 
 
 def check_3_in_6(size, squares: [[bool]]) -> bool:
@@ -138,7 +139,7 @@ def check_3_in_6(size, squares: [[bool]]) -> bool:
     # check for any 3x3 squares of only true
     for i in range(size - 2):
         for j in range(size - 2):
-            if np.all(arr[i : i + 3, j : j + 3]):
+            if np.all(arr[i: i + 3, j: j + 3]):
                 return True
     return False
 
@@ -176,10 +177,10 @@ def check_4_corners(size, squares: [[bool]]) -> bool:
     4 corners
     """
     return (
-        squares[0][0]
-        and squares[0][size - 1]
-        and squares[size - 1][0]
-        and squares[size - 1][size - 1]
+            squares[0][0]
+            and squares[0][size - 1]
+            and squares[size - 1][0]
+            and squares[size - 1][size - 1]
     )
 
 
@@ -207,9 +208,9 @@ def check_J_shape(size, squares: [[bool]]) -> bool:
             # check if rest of cullumn is filled
             if sum([row[i] for row in squares]) == size:
                 if (
-                    squares[size - 1][i - 1]
-                    and squares[size - 1][i - 2]
-                    and squares[size - 2][i - 2]
+                        squares[size - 1][i - 1]
+                        and squares[size - 1][i - 2]
+                        and squares[size - 2][i - 2]
                 ):
                     return True
         else:
@@ -248,7 +249,7 @@ def check_bingos_and_write_to_output(self) -> None:
     if self.reverse:
         cards.reverse()
     if self.start > 0:
-        cards = cards[self.start :]
+        cards = cards[self.start:]
 
     self.cards = cards
     print(f"Checking through {len(cards)} cards....")
@@ -257,22 +258,24 @@ def check_bingos_and_write_to_output(self) -> None:
 
     leng = len(self.cards)
     winning_cards: [dict] = []
-    global lock 
+    global lock
     import threading
     lock = threading.Lock()
-    #but only if there are more cards than threads, cuz otherwise don't work
+    r = tk()
+    r.withdraw()
+    r.clipboard_clear()
+    # but only if there are more cards than threads, cuz otherwise don't work
     if leng >= self.num_of_threads:
         cards_chunks = [
-            self.cards[i : i + leng // self.num_of_threads]
+            self.cards[i: i + leng // self.num_of_threads]
             for i in range(0, leng, leng // self.num_of_threads)
         ]
 
-
         threads = []
-        
+
         for chunk in cards_chunks:
             t = threading.Thread(
-                target=check_part_of_cards, args=(self, chunk, check_bingo, winning_cards)
+                target=check_part_of_cards, args=(self, chunk, check_bingo, winning_cards, r)
             )
             # t.daemon = True
             threads.append(t)
@@ -283,26 +286,26 @@ def check_bingos_and_write_to_output(self) -> None:
         for thread in threads:
             thread.join()
     else:
-        check_part_of_cards(self, self.cards, check_bingo, winning_cards)
+        check_part_of_cards(self, self.cards, check_bingo, winning_cards, r)
 
     if len(winning_cards) > 0:
         previous_wins = read_from_output(self)
-        
+
         new_wins = []
-        #this puts the most recent wins up top first
+        # this puts the most recent wins up top first
         if not previous_wins == []:
             previous_urls = [card["url"] for card in previous_wins]
             new_wins = [
                 card for card in winning_cards if "https://bingobaker.com/play/" + card["url"] not in previous_urls
             ]
-            #only mark the new ones, without having to connect to the server for all of them that are already checked
+            # only mark the new ones, without having to connect to the server for all of them that are already checked
             mark_winning_cards(self, new_wins)
             for card in new_wins:
                 card["url"] = "https://bingobaker.com/play/" + card["url"]
             new_wins.extend(previous_wins)
             write_to_output(self, new_wins)
         else:
-            #if there are no previous wins
+            # if there are no previous wins
             mark_winning_cards(self, winning_cards)
             for card in winning_cards:
                 card["url"] = "https://bingobaker.com/play/" + card["url"]
@@ -312,7 +315,7 @@ def check_bingos_and_write_to_output(self) -> None:
 
 
 def check_part_of_cards(
-    self, cards: [dict], check_bingo_function, winning_cards
+        self, cards: [dict], check_bingo_function, winning_cards, tkinter_clipboard
 ) -> [dict]:
     for card in cards:
         # the following will add new attribute to card dict
@@ -323,7 +326,10 @@ def check_part_of_cards(
                     "CONGRATS YOOO YOU GOT A BINGOO, check the output file for details"
                 )
                 # last 6 charracters of the link
-                card["key"] = f'!bingowin #{ card["url"][-6:]}'
+                card["key"] = f'!bingowin #{card["url"][-6:]}'
+
+                tkinter_clipboard.clipboard_append(card["key"])
+                tkinter_clipboard.update()  # this keeps it after it closes apparently
 
                 print("https://bingobaker.com/play/" + card["url"])
                 print(card["key"])
@@ -370,7 +376,7 @@ def mark(session: str, bingo_id: str, indexes: [int]):
 
     async def send_message():
         async with websockets.connect(
-            f"wss://bingobaker.com/ws?type=handshake&bingo_id={bingo_id}&session_key={session}"
+                f"wss://bingobaker.com/ws?type=handshake&bingo_id={bingo_id}&session_key={session}"
         ) as websocket:
             for index in indexes:
                 message = Template(
@@ -416,7 +422,8 @@ def note_card(self, card: dict) -> None:
     """
     writes the link to the cards.txt file
     """
-    card["url"] =  format_link(card["url"]).split("/")[-1] #delete "https://bingobaker.com/play/" and keep the last charracters of the link
+    card["url"] = format_link(card["url"]).split("/")[
+        -1]  # delete "https://bingobaker.com/play/" and keep the last charracters of the link
     with open(self.cards_path, "a+") as f:
         f.write(json.dumps(card))
         f.write("\n")
@@ -529,7 +536,6 @@ def generate_and_return_details(self, cnt=1) -> dict:
     card_details = get_card_details(self, url, cnt)
     note_card(self, card_details)
     return card_details
-
 
 # def playsound():
 #     import sounddevice

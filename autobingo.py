@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "mode",
     help="The mode to run the program in. [default: editconfig]",
-    choices=["editconfig", "generate", "check"],
+    choices=["editconfig", "generate", "gen", "check"],
     nargs="?",
 )
 
@@ -168,7 +168,7 @@ for option in options:
 bingo = autobingo(**input_options)
 
 match args["mode"]:
-    case "generate":
+    case "generate" | "gen":
         print(f"Generating {options['count']} cards from {options['url']}")
         bingo.create_cards(options["count"])
         print("Cards generated! Check the cards.txt file for the links")

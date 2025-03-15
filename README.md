@@ -76,7 +76,7 @@ options:
   -strt START, --start START
                         The index of the card to start doing anything from
   -fs FREE_SPACE, --free-space FREE_SPACE
-                        Name of the freespace to search for in the card [default: 'no credit']
+                        Name of the freespace to search for in the card [default: 'free space']
   -acc NUM_OF_THREADS, -accelleration NUM_OF_THREADS
                         The number of threads to use for speeding up
 
@@ -124,7 +124,7 @@ python autobingo.py mark --reverse
 
 ### <font size=5> --start <sub>[int, default: 0, shorthard -strt] </sub> </font>:  The index of the card to start doing anything from (kinda deprecated, was used when the app was slow asl)
 
-### <font size=5> --free-space <sub>[string, default: "no credit", shorthand -fs] </sub> </font>: The name of the freespace spot to check for if the card has an even size (meaning there is no clear midde spot)
+### <font size=5> --free-space <sub>[string, default: "free space", shorthand -fs] </sub> </font>: The name of the freespace spot to check for if the card has an even size (meaning there is no clear midde spot)
 
 ### <font size=5> --input <sub> [default: input.txt , shorthand -i]</sub> </font>  is the file in which you have the keywords you want to search for on the bingo cards, each keyword on a new line. They DON'T have to match perfectly with the ones in the cards: It's case insesitive and looks if the phrases in each line are a substring of what's written on the cards, for example:
 #### **`inpux.txt`**

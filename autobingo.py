@@ -87,7 +87,7 @@ parser.add_argument(
 parser.add_argument(
     "-fs",
     "--free-space",
-    help="Name of the freespace to search for in the card [default: 'no credit']",
+    help="Name of the freespace to search for in the card [default: 'free space']",
     type=str,
     dest="free_space",
 )

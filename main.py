@@ -21,7 +21,7 @@ class autobingo:
         gamemode: str = "normal",
         reverse: bool = False,
         start: int = 0,
-        free_space: str = "no credit",
+        free_space: str = "free space",
         free_space_in_middle: bool = False,
         headless: bool = True,
         size: int = 5,

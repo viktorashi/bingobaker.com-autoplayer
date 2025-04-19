@@ -70,33 +70,43 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-r",
-    "--reverse",
-    help="(deprecated) Reverse the bingo card order when reading from [cards.txt] [default False]",
-    action="store_true",
-    dest="reverse",
-)
-
-parser.add_argument(
-    "-strt",
-    "--start",
-    help="(deprecated) The index of the card to start doing anything from",
-    type=int,
-    dest="start",
-)
-parser.add_argument(
     "-fs",
     "--free-space",
     help="Name of the freespace to search for in the card [default: 'free space']",
     type=str,
     dest="free_space",
 )
+
 parser.add_argument(
     "-acc",
-    "-accelleration",
+    "--accelleration",
     help="The number of threads to use for speeding up",
     type=int,
     dest="num_of_threads",
+)
+parser.add_argument(
+    "-winfmt",
+    "--bingowin-fmt",
+    help='Whether to put a hashtag in front of the bingocard ID at the bingowin; nohash => !bingowin <url> | hash => !bingowin #<url>  [default:  hash]',
+    type=str,
+    dest="bingowin_fmt",
+)
+
+
+# kinda deprecated from the previous versions when fetching cards was slow asf
+parser.add_argument(
+    "-r",
+    "--reverse",
+    help="(deprecated) Reverse the bingo card order when reading from [cards.txt] [default False]",
+    action="store_true",
+    dest="reverse",
+)
+parser.add_argument(
+    "-strt",
+    "--start",
+    help="(deprecated) The index of the card to start doing anything from",
+    type=int,
+    dest="start",
 )
 
 # the rest of the defaults are in the autobingo class definition
@@ -158,7 +168,7 @@ if args["mode"] == "editconfig":
 from main import autobingo
 
 not_for_class = ["count"]
-# it's "options" without the "count" key
+# its "options" without the "count" key
 input_options = {}
 for option in options:
     if not (option in not_for_class):

@@ -7,26 +7,28 @@ from utils import (
     update_config_one_attr,
 )
 
+
 # do enums idk
 
 
 class autobingo:
     def __init__(
-        self,
-        driver: str = "chrome",
-        cards_path="cards.txt",
-        input_path="input.txt",
-        url: str = "",
-        output_path="output.json",
-        gamemode: str = "normal",
-        reverse: bool = False,
-        start: int = 0,
-        free_space: str = "free space",
-        free_space_in_middle: bool = False,
-        headless: bool = True,
-        size: int = 5,
-        bingo_id: str = "",
-        num_of_threads: int = 7,
+            self,
+            driver: str = "chrome",
+            cards_path="cards.txt",
+            input_path="input.txt",
+            url: str = "",
+            output_path="output.json",
+            gamemode: str = "normal",
+            reverse: bool = False,
+            start: int = 0,
+            free_space: str = "free space",
+            free_space_in_middle: bool = False,
+            headless: bool = True,
+            size: int = 5,
+            bingo_id: str = "",
+            num_of_threads: int = 7,
+            bingowin_fmt: str = "hash",
     ) -> None:
         """
         driver : selenium.webdriver
@@ -39,6 +41,7 @@ class autobingo:
         # turn input phrases file path into list of strings
         # dont mention input_path or cards_path if you're using the generate function
         self.num_of_threads = num_of_threads
+        self.bingowin_fmt = bingowin_fmt
         self.free_space_in_middle = free_space_in_middle
         self.size = size
         self.input_path = input_path

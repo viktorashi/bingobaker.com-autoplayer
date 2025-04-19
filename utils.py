@@ -323,7 +323,7 @@ def check_part_of_cards(
                     "CONGRATS YOOO YOU GOT A BINGOO, check the output file for details"
                 )
                 # last 6 charracters of the link
-                card["key"] = f'!bingowin #{card["url"][-6:]}'
+                card["key"] = get_bingowin_for_chat(self, card["url"][-6:])
 
                 pyperclip.copy(card["key"])
 
@@ -392,6 +392,12 @@ import json
 def format_link(url):
     return url.replace("#", "play/")
 
+def get_bingowin_for_chat(self, card_url: dict) -> str:
+    match self.bingowin_fmt:
+        case "hash":
+            return f'!bingowin  #{card_url}'
+        case "nohash":
+            return f'!bingowin {card_url}'
 
 def update_config(options: dict):
     with open("bingoconfig.json", "w+") as f:
